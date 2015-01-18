@@ -11,6 +11,12 @@ class Roster extends WorksheetContainer
 	protected $emailIndex;
 	
 	/**
+	 *
+	 * @var array
+	 */
+	protected $usernameIndex;
+	
+	/**
 	 * 
 	 * @param string $email
 	 * @return \TCRD\Worksheet\Ambigous|boolean
@@ -21,6 +27,21 @@ class Roster extends WorksheetContainer
 		
 		if (isset($index[$email])) {
 			return $index[$email];
+		}
+		return false;
+	}
+	
+	/**
+	 *
+	 * @param string $username
+	 * @return \TCRD\Worksheet\Ambigous|boolean
+	 */
+	public function findUsername($username)
+	{
+		$index = $this->getUsernameIndex();
+	
+		if (isset($index[$username])) {
+			return $index[$username];
 		}
 		return false;
 	}
@@ -48,6 +69,31 @@ class Roster extends WorksheetContainer
 		}
 		return $this->emailIndex;
 		
+	}
+	
+	/**
+	 * special username index due to capitalization issue
+	 *
+	 * @return Ambigous <multitype:, \TCRD\Worksheet\Google\Spreadsheet\ListEntry>
+	 */
+	public function getUsernameIndex()
+	{
+		if (null == $this->usernameIndex) {
+			$this->usernameIndex = array();
+				
+			$listFeed = $this->getListFeed();
+				
+			/* @var $entry Google\Spreadsheet\ListEntry */
+			foreach ($listFeed->getEntries() as $entry) {
+				$values = $entry->getValues();
+				$key = trim(strtolower($values['username']));
+	
+				// TODO some error checking
+				$this->usernameIndex[$key] = $entry;
+			}
+		}
+		return $this->usernameIndex;
+	
 	}
 	
 

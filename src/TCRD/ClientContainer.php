@@ -57,7 +57,9 @@ class ClientContainer
 	{
 		$accessToken = $this->client->getAccessToken();
 		if (!$accessToken) {
-			$accessToken = file_get_contents($this->accessFile);
+			if (file_exists($this->accessFile)) {
+				$accessToken = file_get_contents($this->accessFile);
+			}
 			if ($accessToken) {
 				$this->client->setAccessToken($accessToken);
 			}
@@ -68,7 +70,9 @@ class ClientContainer
 		}
 
 		if ($this->client->isAccessTokenExpired()) {
+			
 			$refreshToken = file_get_contents($this->refreshFile);
+			
 			$this->client->refreshToken($refreshToken);
 
 			$accessToken = $this->client->getAccessToken();

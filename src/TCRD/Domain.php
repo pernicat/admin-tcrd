@@ -42,7 +42,7 @@ class Domain
 	
 	/**
 	 * 
-	 * @return Google_Service_Directory
+	 * @return \Google_Service_Directory
 	 */
 	public function getDirectory()
 	{
@@ -65,7 +65,7 @@ class Domain
 	
 	/**
 	 * 
-	 * @return Google_Service_Directory_Users 
+	 * @return \Google_Service_Directory_Users 
 	 */
 	public function getActiveUsers()
 	{
@@ -75,5 +75,40 @@ class Domain
 				'query' => 'isSuspended=false'
 		));
 		return $users;
+	}
+	
+	/**
+	 * 
+	 * @return \Google_Service_Directory_Users 
+	 */
+	public function getSuspendedUsers()
+	{
+		$directory = $this->getDirectory();
+		$users = $directory->users->listUsers(array(
+				'domain' => $this->getName(),
+				'query' => 'isSuspended=true'
+		));
+		return $users;
+	}
+	
+	/**
+	 * 
+	 * @return Google_Service_Directory_Users
+	 */
+	public function getAllUsers()
+	{
+		$directory = $this->getDirectory();
+		$users = $directory->users->listUsers(array(
+				'domain' => $this->getName()
+		));
+		return $users;
+	}
+	
+	public function listUsers($parms = array())
+	{
+		$parms['domain'] = $this->getName();
+		$directory = $this->getDirectory();
+		return $directory->users->listUsers($parms);
+		
 	}
 }
