@@ -48,9 +48,19 @@ class Domain
 	{
 		if (null == $this->directory) {
 			$client = $this->getClient();
-			$this->directory = new Google_Service_Directory($client);
+			$this->directory = new \Google_Service_Directory($client);
 		}
 		return $this->directory;
+	}
+	
+	/**
+	 * 
+	 * @return string:
+	 */
+	public function getName()
+	{
+		// TODO error checking
+		return $this->specs['name'];
 	}
 	
 	/**
@@ -61,7 +71,7 @@ class Domain
 	{
 		$directory = $this->getDirectory();
 		$users = $directory->users->listUsers(array(
-				'domain' => 'tcrollerderby.com',
+				'domain' => $this->getName(),
 				'query' => 'isSuspended=false'
 		));
 		return $users;
