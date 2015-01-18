@@ -24,11 +24,24 @@ class Domain
 	/**
 	 * 
 	 * @param ClientContainer $clientContainer
-	 * @param array $specs
+	 * @param array|string $specs
 	 */
-	public function __construct(ClientContainer $clientContainer, $specs = null) 
+	public function __construct(ClientContainer $clientContainer, $specs) 
 	{
 		$this->clientContainer = $clientContainer;
+		
+		if (is_string($specs)) {
+			$specs = array('name' => $specs);
+		}
+		
+		$this->setSpecs($specs);
+	}
+	
+	protected function setSpecs($specs) {
+		if (!isset($specs['name'])) {
+			throw new \Exception("specs must specify a name");
+		}
+		
 		$this->specs = $specs;
 	}
 	
@@ -65,47 +78,14 @@ class Domain
 	
 	/**
 	 * 
-	 * @return \Google_Service_Directory_Users 
-	 */
-	public function getActiveUsers()
-	{
-		$directory = $this->getDirectory();
-		$users = $directory->users->listUsers(array(
-				'domain' => $this->getName(),
-				'query' => 'isSuspended=false'
-		));
-		return $users;
-	}
-	
-	/**
-	 * 
-	 * @return \Google_Service_Directory_Users 
-	 */
-	public function getSuspendedUsers()
-	{
-		$directory = $this->getDirectory();
-		$users = $directory->users->listUsers(array(
-				'domain' => $this->getName(),
-				'query' => 'isSuspended=true'
-		));
-		return $users;
-	}
-	
-	/**
-	 * 
+	 * @param array $parms
 	 * @return Google_Service_Directory_Users
 	 */
-	public function getAllUsers()
-	{
-		$directory = $this->getDirectory();
-		$users = $directory->users->listUsers(array(
-				'domain' => $this->getName()
-		));
-		return $users;
-	}
-	
 	public function listUsers($parms = array())
 	{
+		if (!is_array($parms)) {
+			throw new \Exception("\$params must be an array.");
+		}
 		$parms['domain'] = $this->getName();
 		$directory = $this->getDirectory();
 		return $directory->users->listUsers($parms);

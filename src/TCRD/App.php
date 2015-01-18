@@ -14,6 +14,12 @@ class App
 	
 	/**
 	 * 
+	 * @var array
+	 */
+	protected $domainIndex = array();
+	
+	/**
+	 * 
 	 * @var Roster
 	 */
 	protected $roster;
@@ -52,7 +58,7 @@ class App
 	{
 		$name = $domain->getName();
 		$this->domains[$name] = $domain;
-		return this;
+		return $this;
 	}
 	
 	/**
@@ -69,19 +75,6 @@ class App
 	}
 	
 	/**
-	 * returns an arry of deactivated users
-	 * @return array:
-	 */
-	public function cleanUsers()
-	{
-		$removed = array();
-		foreach ($this->domains as $domain) {
-			$removed = array_merge($removed, $this->cleanDomainUsers($domain));
-		}
-		return $removed;
-	}
-	
-	/**
 	 * 
 	 * @param \Google_Service_Directory_User $user
 	 * @throws \Exception
@@ -94,11 +87,54 @@ class App
 		$domain = $emailParts[1];
 		
 		if (!$domain) {
-			throw new \Exception("could not find domain part of $email\n");
+			throw new \Exception("could not find domain part of $email");
 		}
 		
 		return $this->getDomain($domain);
 	}
+	
+	/**
+	 * 
+	 * @param string $name
+	 * @return Ambigous <\Google_Service_Directory_User>|boolean
+	 */
+	public function findUsername($name)
+	{
+		$index = $this->getDomainUsernameIndex();
+		
+		if (isset($index[$name])) {
+			return $index[$name];
+		}
+		
+		return false;
+	}
+	
+	/**
+	 * 
+	 * @return multitype:\Google_Service_Directory_User
+	 */
+	public function getDomainUsernameIndex() {
+		if (!isset($this->domainIndex['username'])) {
+			$this->domainIndex['username'] = array();
+			
+			$users = $this->listUsers();
+			
+			/* @var $user \Google_Service_Directory_User */
+			foreach ($users as $user) {
+				$email = $user->getPrimaryEmail();
+				$emailParts = explode('@', $email);
+				$username = $emailParts[0];
+					
+				if (isset($this->domainIndex['username'][$username])) {
+					continue;
+				}
+				
+				$this->domainIndex['username'][$username] = $user;
+			}
+		}
+		return $this->domainIndex['username'];
+	}
+	
 	
 	/**
 	 * 
@@ -113,26 +149,25 @@ class App
 		return $directory->users->update($email, $user);
 	}
 	
+	
 	/**
-	 * 
-	 * @param Domain $domain
-	 * @return Ambigous <multitype:, \Google_Service_Directory_User>
+	 * returns an arry of deactivated users
+	 * @return array:
 	 */
-	protected function cleanDomainUsers(Domain $domain)
+	public function listRemovedUsers()
 	{
-		
-		$users = $domain->getActiveUsers();
+		$users = $this->listUsers(array('query' => 'isSuspended=false'));
 		
 		$removeList = array();
 		
 		/* @var $user \Google_Service_Directory_User */
 		foreach ($users as $user) {
 			$email = $user->getPrimaryEmail();
-			
+				
 			if (in_array($email, $this->exempt)) {
 				continue;
 			}
-			
+				
 			if ($this->roster->findEmail($email)) {
 				continue;
 			}
@@ -140,24 +175,37 @@ class App
 			if ($user->suspended) {
 				continue;
 			}
-			
-			// Suspends the user
-			$user->setSuspended(true);
-			$domain->getDirectory()->users->update($email, $user);
-			
+				
 			$removeList[] = $user;
 		}
 		
 		return $removeList;
 	}
 	
+	public function listUnsuspendedUsers()
+	{
+		$users = $this->listUsers(array('query' => 'isSuspended=true'));
+		
+		$list = array();
+		
+		/* @var $user \Google_Service_Directory_User */
+		foreach ($users as $user) {
+			$email = $user->getPrimaryEmail();
+			
+			if ($this->roster->findEmail($email)) {
+				$list[] = $user;
+			}
+		}
+		return $list;
+	}
+	
 	/**
 	 * 
 	 * @return multitype:\Google_Service_Directory_User
 	 */
-	public function findMissmatchUsers() 
+	public function listMissmatchUsers() 
 	{
-		$users = $this->getAllDomainUsers();
+		$users = $this->listUsers();
 		
 		$list = array();
 		
@@ -181,40 +229,17 @@ class App
 		return $list;
 	}
 	
-	
-	public function listUsers($params)
-	{
-		
-	}
-	
 	/**
 	 * 
+	 * @param array $params
 	 * @return multitype:\Google_Service_Directory_User
 	 */
-	public function getSuspendedUsers() 
+	public function listUsers($params = array())
 	{
 		$users = array();
 		/* @var $domain Domain */
 		foreach ($this->domains as $domain) {
-			$domainUsers = $domain->getSuspendedUsers();
-			// TODO find more efficient way of doing this
-			foreach ($domainUsers as $user) {
-				$users[] = $user;
-			}
-		}
-		return $users;
-	}
-	
-	/**
-	 * 
-	 * @return multitype:\Google_Service_Directory_User
-	 */
-	public function getAllDomainUsers()
-	{
-		$users = array();
-		/* @var $domain Domain */
-		foreach ($this->domains as $domain) {
-			$domainUsers = $domain->getAllUsers();
+			$domainUsers = $domain->listUsers($params);
 			// TODO find more efficient way of doing this
 			foreach ($domainUsers as $user) {
 				$users[] = $user;
