@@ -1,0 +1,10 @@
+{
+  "require": {
+    "google/apiclient": "1.0.*@beta",
+    "asimlqt/php-google-spreadsheet-client": "2.3.*",
+    "pimple/pimple": "~3.0"
+  },
+  "autoload": {
+    "psr-0": {"TCRD": "src/"}
+  }
+}

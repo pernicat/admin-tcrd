@@ -1,0 +1,69 @@
+<?php
+namespace TCRD;
+
+class Domain
+{
+	/**
+	 * 
+	 * @var ClientContainer
+	 */
+	protected $clientContainer;
+	
+	/**
+	 * 
+	 * @var array
+	 */
+	protected $specs;
+	
+	/**
+	 * 
+	 * @var \Google_Service_Directory
+	 */
+	protected $directory;
+	
+	/**
+	 * 
+	 * @param ClientContainer $clientContainer
+	 * @param array $specs
+	 */
+	public function __construct(ClientContainer $clientContainer, $specs = null) 
+	{
+		$this->clientContainer = $clientContainer;
+		$this->specs = $specs;
+	}
+	
+	/**
+	 * @return \Google_Client
+	 */
+	public function getClient()
+	{
+		return $this->clientContainer->getClient();
+	}
+	
+	/**
+	 * 
+	 * @return Google_Service_Directory
+	 */
+	public function getDirectory()
+	{
+		if (null == $this->directory) {
+			$client = $this->getClient();
+			$this->directory = new Google_Service_Directory($client);
+		}
+		return $this->directory;
+	}
+	
+	/**
+	 * 
+	 * @return Google_Service_Directory_Users 
+	 */
+	public function getActiveUsers()
+	{
+		$directory = $this->getDirectory();
+		$users = $directory->users->listUsers(array(
+				'domain' => 'tcrollerderby.com',
+				'query' => 'isSuspended=false'
+		));
+		return $users;
+	}
+}

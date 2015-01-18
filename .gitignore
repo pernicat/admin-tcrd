@@ -1,0 +1,7 @@
+vendor
+data
+composer.lock
+.settings
+.buildpath
+.project
+scripts/bootstrap.php
