@@ -99,6 +99,62 @@ class App
 	
 	/**
 	 * 
+	 * @param array $values
+	 * @throws \Exception
+	 * @return array
+	 */
+	public function createUserValues($values)
+	{
+		if (!isset($values['givenname'])) {
+			throw new \Exception("'givenname' must be set");
+		}
+		
+		if (!isset($values['familyname'])) {
+			throw new \Exception("'familyname' must be set");
+		}
+		
+		if (!isset($values['username']) || !$values['username']) {
+			$values['username'] = $this->generateUsername(
+					$values['givenname'], 
+					$values['familyname']);
+		} else {
+			$values['username'] =  $this->cleanName($values['username']);
+		}
+		
+		$domain = $this->getNextDomain();
+		
+		$domainName = $domain->getName();
+		
+		$values['tcrde-mail'] = $values['username'] . '@' . $domainName;
+		return $values;
+	}
+	
+	/**
+	 * 
+	 * @param string $givenName
+	 * @param string $familyName
+	 * @return string
+	 */
+	public function generateUsername($givenName, $familyName)
+	{
+		$givenName = $this->cleanName($givenName);
+		$familyName = $this->cleanName($familyName);
+		
+		return "$givenName.$familyName";
+	}
+	
+	/**
+	 * 
+	 * @param string $name
+	 * @return string
+	 */
+	public function cleanName($name)
+	{
+		return strtolower(str_replace(' ', '', $name));
+	}
+	
+	/**
+	 * 
 	 * @param \Google_Service_Directory_User $user
 	 * @throws \Exception
 	 * @return Ambigous <boolean, multitype:\TCRD\Domain >
@@ -367,6 +423,23 @@ class App
 		}
 		return $users;
 	}
+	
+	
+	public function getNextDomain()
+	{
+		$most = 0;
+		$domain = false;
+		/* @var $domain \TCRD\Domain */
+		foreach ($this->domains as $domain) {
+			$vacancy = $domain->getVacancy();
+			if ($vacancy > $most) {
+				$most = $vacancy;
+				$domain = $domain;
+			}
+		}
+		return $domain;
+	}
+	
 	
 	/**
 	 * @return \Google_Service_Directory

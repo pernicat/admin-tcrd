@@ -1,8 +1,19 @@
 <?php
 namespace TCRD;
 
-class Domain
+class Domain implements \Countable
 {
+	
+	const DOMAIN_LIMIT = 50;
+	
+	protected $count;
+	
+	/**
+	 * 
+	 * @var number
+	 */
+	public $userBuffer = 5;
+	
 	/**
 	 * 
 	 * @var ClientContainer
@@ -106,8 +117,13 @@ class Domain
 		}
 		$params['domain'] = $this->getName();
 		$directory = $this->getDirectory();
-		return $directory->users->listUsers($params);
+		$users =  $directory->users->listUsers($params);
 		
+		if (1 === count($params)) {
+			$this->count = count($users);
+		}
+		
+		return $users;
 	}
 	
 	/**
@@ -253,5 +269,35 @@ class Domain
 		}
 		return $results;
 	}
+	
+	/**
+	 * 
+	 * @return number
+	 */
+	public function count()
+	{
+		if (null === $this->count) {
+			$this->count = count($this->listUsers());
+		}
+		return $this->count;
+	}
+	
+	/**
+	 * 
+	 * @return number
+	 */
+	public function getVacancy()
+	{
+		$count = count($this);
+		$vacancy = self::DOMAIN_LIMIT - $this->userBuffer - $count;
+		
+		if (0 > $vacancy) {
+			return 0;
+		}
+		
+		return $vacancy;
+	}
+	
+	
 	
 }

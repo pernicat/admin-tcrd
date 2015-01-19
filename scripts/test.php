@@ -14,4 +14,6 @@ $process = $pimp['TCRD.process'];
 //$process->removeUsersFromPositions();
 $process->createUsers();
 
+//print $process->app->getNextDomain()->getName();
+
 print "done\n";

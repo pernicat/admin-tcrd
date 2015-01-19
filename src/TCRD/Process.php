@@ -7,7 +7,7 @@ class Process
 	 * 
 	 * @var App
 	 */
-	protected $app;
+	public $app;
 	
 	/**
 	 * 
@@ -124,12 +124,18 @@ class Process
 				$this->log("Creat User Error: " . $errors[0]);
 				continue;
 			}
+			
+			
+			$values = $this->app->createUserValues($values);
+			
 			$givenName = $values['givenname'];
 			$familyName = $values['familyname'];
 			
 			$this->log("adding $givenName $familyName");
 			
 			//print_r($values);
+			
+			$entry->update($values);
 		}
 		return $this;
 	}
@@ -219,6 +225,18 @@ class Process
 		}
 		return $this;
 	}
+	
+	/**
+	 * 
+	 * @return \TCRD\Process
+	 */
+	public function addShareToAll()
+	{
+		// TODO implement
+		return $this;
+	}
+	
+	
 	
 	/**
 	 * 
