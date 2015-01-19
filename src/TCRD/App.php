@@ -2,6 +2,7 @@
 namespace TCRD;
 
 use TCRD\Worksheet\Roster;
+use TCRD\Worksheet\WorksheetContainer;
 
 
 class App
@@ -23,6 +24,18 @@ class App
 	 * @var Roster
 	 */
 	protected $roster;
+	
+	/**
+	 * 
+	 * @var WorksheetContainer
+	 */
+	public $positions;
+	
+	/**
+	 * 
+	 * @var Domain
+	 */
+	public $mainDomain;
 	
 	/**
 	 * 
@@ -72,6 +85,16 @@ class App
 			return $this->domains[$name];
 		}
 		return false;
+	}
+	
+	/**
+	 * 
+	 * @return \TCRD\Domain
+	 */
+	public function getMainDomain()
+	{
+		// TODO error checking
+		return $this->mainDomain;
 	}
 	
 	/**
@@ -182,6 +205,10 @@ class App
 		return $removeList;
 	}
 	
+	/**
+	 * 
+	 * @return multitype:\Google_Service_Directory_User
+	 */
 	public function listUnsuspendedUsers()
 	{
 		$users = $this->listUsers(array('query' => 'isSuspended=true'));
@@ -229,6 +256,30 @@ class App
 		return $list;
 	}
 	
+	public function listNewPositions()
+	{
+		$listFeed = $this->positions->getListFeed();
+
+		$results = array();
+		
+		/* @var $entry Google\Spreadsheet\ListEntry */
+		foreach ($listFeed->getEntries() as $entry) {
+			$values = $entry->getValues();
+			
+			if (!$this->mainDomain->getGroup($values['email'])) {
+				
+				$group = new \Google_Service_Directory_Group();
+				
+				$group->setEmail($values['email']);
+				$group->setName($values['name']);
+				$group->setDescription($values['description']);
+				
+				$results[] = $group;
+			}
+		}
+		return $results;
+	}
+	
 	/**
 	 * 
 	 * @param array $params
@@ -246,6 +297,25 @@ class App
 			}
 		}
 		return $users;
+	}
+	
+	/**
+	 * @return \Google_Service_Directory
+	 */
+	public function getDirectory()
+	{
+		$domain = $this->getMainDomain();
+		return $domain->getDirectory();
+	}
+	
+	/**
+	 * @todo remove this?
+	 * @param unknown $params
+	 */
+	public function listGroups($params = array())
+	{
+		$domain = $this->getMainDomain();		
+		return $domain->listGroups($params);
 	}
 	
 }

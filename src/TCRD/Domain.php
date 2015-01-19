@@ -23,6 +23,12 @@ class Domain
 	
 	/**
 	 * 
+	 * @var array
+	 */
+	protected $goupIndex;
+	
+	/**
+	 * 
 	 * @param ClientContainer $clientContainer
 	 * @param array|string $specs
 	 */
@@ -81,14 +87,68 @@ class Domain
 	 * @param array $parms
 	 * @return Google_Service_Directory_Users
 	 */
-	public function listUsers($parms = array())
+	public function listUsers($params = array())
 	{
-		if (!is_array($parms)) {
+		if (!is_array($params)) {
 			throw new \Exception("\$params must be an array.");
 		}
-		$parms['domain'] = $this->getName();
+		$params['domain'] = $this->getName();
 		$directory = $this->getDirectory();
-		return $directory->users->listUsers($parms);
+		return $directory->users->listUsers($params);
 		
+	}
+	
+	/**
+	 * 
+	 * @param array $params
+	 * @throws \Exception
+	 * @return Google_Service_Directory_Groups
+	 */
+	public function listGroups($params = array())
+	{
+		if (!is_array($params)) {
+			throw new \Exception("\$params must be an array.");
+		}
+		$params['domain'] = $this->getName();
+		$directory = $this->getDirectory();
+		return $directory->groups->listGroups($params);
+	}
+	
+	/**
+	 * 
+	 * @param string $name
+	 * @return Ambigous <\Google_Service_Directory_Group>|boolean
+	 */
+	public function getGroup($name)
+	{
+		$index = $this->getGroupIndex();
+		
+		if (isset($index[$name])) {
+			return $index[$name];
+		}
+		return false;
+	}
+	
+	/**
+	 * 
+	 * @return multitype:\Google_Service_Directory_Group
+	 */
+	public function getGroupIndex()
+	{
+		if (null == $this->goupIndex) {
+			$this->goupIndex =  array();
+			
+			$groups = $this->listGroups();
+			
+			/* @var $group Google_Service_Directory_Group */
+			foreach ($groups as $group) {
+
+				$email = $group->getEmail();
+				
+				$this->goupIndex[$email] = $group;
+			
+			}
+		}
+		return $this->goupIndex;
 	}
 }
