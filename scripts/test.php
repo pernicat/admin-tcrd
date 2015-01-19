@@ -7,5 +7,7 @@ require_once realpath('bootstrap.php');
 $process = $pimp['TCRD.process'];
 
 //$process->newPositions();
+$process->validatePositionMembers();
+$process->removeUsersFromPositions();
 
 print "done\n";

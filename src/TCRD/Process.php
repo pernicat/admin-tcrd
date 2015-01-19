@@ -11,6 +11,12 @@ class Process
 	
 	/**
 	 * 
+	 * @var \TCRD\Validator\UsernameValidator
+	 */
+	public $usernameValidator;
+	
+	/**
+	 * 
 	 * @param App $app
 	 */
 	public function __construct(App $app)
@@ -97,6 +103,39 @@ class Process
 			$this->log($msg);
 		}
 		
+		return $this;
+	}
+	
+	public function validatePositionMembers()
+	{
+		$listFeed = $this->app->positions->getListFeed();
+		
+		$results = array();
+		
+		/* @var $entry Google\Spreadsheet\ListEntry */
+		foreach ($listFeed->getEntries() as $entry) {
+			$values = $entry->getValues();
+			$member = $values['member'];
+			
+			$this->usernameValidator->setValue($member);
+			if ($this->usernameValidator->isValid()) {
+				continue;
+			}
+			
+			$errors = $this->usernameValidator->getErrors();
+			foreach ($errors as $error) {
+				$this->log("Position Error: Member " . $error);
+			}
+		}
+		return $this;
+	}
+	
+	public function removeUsersFromPositions()
+	{
+		$removals = $this->app->listRemoveUsersFromPositions();
+		foreach ($removals as $removal) {
+			$this->log($removal['groupKey'] . " remove " . $removal['memberKey']);
+		}
 		return $this;
 	}
 	

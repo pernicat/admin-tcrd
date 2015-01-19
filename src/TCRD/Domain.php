@@ -29,6 +29,12 @@ class Domain
 	
 	/**
 	 * 
+	 * @var array
+	 */
+	protected $membersIndex = array();
+	
+	/**
+	 * 
 	 * @param ClientContainer $clientContainer
 	 * @param array|string $specs
 	 */
@@ -112,6 +118,44 @@ class Domain
 		$params['domain'] = $this->getName();
 		$directory = $this->getDirectory();
 		return $directory->groups->listGroups($params);
+	}
+	
+	/**
+	 * 
+	 * @param string $groupKey
+	 * @param string $email
+	 * @return Ambigous <Google_Service_Directory_Member>|boolean
+	 */
+	public function getMember($groupKey, $email)
+	{
+		$index = $this->getMembersIndex($groupKey);
+		if (isset($index[$email])) {
+			return $index[$email];
+		}
+		return false;
+	}
+	
+	/**
+	 * 
+	 * @param string $groupKey
+	 * @return multitype:\Google_Service_Directory_Member
+	 */
+	public function getMembersIndex($groupKey)
+	{
+		if (!isset($this->membersIndex[$groupKey])) {
+			
+			$this->membersIndex[$groupKey] = array();
+			
+			$directory = $this->getDirectory();
+			$members = $directory->members->listMembers($groupKey);
+			
+			/* @var $member \Google_Service_Directory_Member */
+			foreach ($members as $member) {
+				$this->membersIndex[$groupKey][$member->email] = $member;
+			}
+			
+		}
+		return $this->membersIndex[$groupKey];
 	}
 	
 	/**

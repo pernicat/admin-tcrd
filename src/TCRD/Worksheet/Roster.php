@@ -19,7 +19,7 @@ class Roster extends WorksheetContainer
 	/**
 	 * 
 	 * @param string $email
-	 * @return \TCRD\Worksheet\Ambigous|boolean
+	 * @return \Google\Spreadsheet\ListEntry|boolean
 	 */
 	public function findEmail($email)
 	{
@@ -34,7 +34,7 @@ class Roster extends WorksheetContainer
 	/**
 	 *
 	 * @param string $username
-	 * @return \TCRD\Worksheet\Ambigous|boolean
+	 * @return \Google\Spreadsheet\ListEntry|boolean
 	 */
 	public function findUsername($username)
 	{
@@ -49,7 +49,7 @@ class Roster extends WorksheetContainer
 	/**
 	 * special e-mail index due to capitalization issue
 	 * 
-	 * @return Ambigous <multitype:, \TCRD\Worksheet\Google\Spreadsheet\ListEntry>
+	 * @return Ambigous <multitype:, \Google\Spreadsheet\ListEntry>
 	 */
 	public function getEmailIndex() 
 	{
@@ -74,7 +74,7 @@ class Roster extends WorksheetContainer
 	/**
 	 * special username index due to capitalization issue
 	 *
-	 * @return Ambigous <multitype:, \TCRD\Worksheet\Google\Spreadsheet\ListEntry>
+	 * @return Ambigous <multitype:, \Google\Spreadsheet\ListEntry>
 	 */
 	public function getUsernameIndex()
 	{
@@ -94,6 +94,35 @@ class Roster extends WorksheetContainer
 		}
 		return $this->usernameIndex;
 	
+	}
+	
+	/**
+	 * 
+	 * @param string $name
+	 * @return string
+	 */
+	public function findClosestUsername($name)
+	{
+		$usernames = $this->getUsernameIndex();
+		
+		$shortest = -1;
+		foreach ($usernames as $key => $value) {
+			$lev = levenshtein($name, $key);
+		
+			if ($lev == 0) {
+				$closest = $key;
+				$shortest = 0;
+		
+				break;
+			}
+		
+			if ($lev <= $shortest || $shortest < 0) {
+				$closest  = $key;
+				$shortest = $lev;
+			}
+		}
+		
+		return $closest;
 	}
 	
 

@@ -45,6 +45,12 @@ class App
 	
 	/**
 	 * 
+	 * @var array
+	 */
+	public $universal = array();
+	
+	/**
+	 * 
 	 * @param Roster $roster
 	 * @param array $domains
 	 */
@@ -256,6 +262,10 @@ class App
 		return $list;
 	}
 	
+	/**
+	 * 
+	 * @return multitype:\Google_Service_Directory_Group
+	 */
 	public function listNewPositions()
 	{
 		$listFeed = $this->positions->getListFeed();
@@ -279,6 +289,61 @@ class App
 		}
 		return $results;
 	}
+	
+	
+	public function listRemoveUsersFromPositions()
+	{
+		$listFeed = $this->positions->getListFeed();
+		
+		$results = array();
+		
+		/* @var $entry Google\Spreadsheet\ListEntry */
+		foreach ($listFeed->getEntries() as $entry) {
+			$values = $entry->getValues();
+			
+			$groupKey = $values['email'];
+			
+			$memberNames = explode(',', $values['member']);
+			
+			$members = array();
+			
+			foreach ($memberNames as $member) {
+				$userEntity = $this->roster->findUsername(trim($member));
+				if (!$userEntity) {
+					continue;
+				}
+				$userValues = $userEntity->getValues();
+				$members[] = $userValues['tcrde-mail'];
+			}
+			
+			
+			$memberships = $this->mainDomain->getMembersIndex($groupKey);
+			
+			// TODO give this its own function
+			/* @var $membership \Google_Service_Directory_Member */
+			foreach ($memberships as $membership) {
+				$email = $membership->getEmail();				
+				
+				if (!in_array($email, $members)) {
+					
+					if (in_array($email, $this->universal)) {
+						continue;
+					}
+					
+					$results[] = array(
+							'groupKey' => $groupKey,
+							'memberKey' => $email);
+				}
+			}
+			
+			//foreach ($members as $member) {
+			//	$this->mainDomain->getMember($email, $member);
+			//}
+			
+		}
+		return $results;
+	}
+	
 	
 	/**
 	 * 
