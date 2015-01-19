@@ -23,7 +23,7 @@ class App
 	 * 
 	 * @var Roster
 	 */
-	protected $roster;
+	public $roster;
 	
 	/**
 	 * 
@@ -332,7 +332,13 @@ class App
 				
 			$groupKey = $values['email'];
 				
-			$list = array($this->roster->findMemberKey($values['member']));
+			$username = $this->roster->findMemberKey($values['member']);
+			
+			if (!$username) {
+				continue;
+			}
+			
+			$list = array($username);
 				
 			$memberships = $this->mainDomain->getMembersIndex($groupKey);
 				

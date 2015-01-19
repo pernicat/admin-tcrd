@@ -103,6 +103,38 @@ class Process
 	}
 	
 	/**
+	 * 
+	 * @return \TCRD\Process
+	 */
+	public function createUsers()
+	{
+		$entries = $this->app->roster->listNoEmail();
+		
+		// TODO dependency injection for this
+		$validator = new \TCRD\Validator\NewUserValidator();
+		
+		/* @var $entry \Google\Spreadsheet\ListEntry */
+		foreach ($entries as $entry) {
+			$values = $entry->getValues();
+			$validator->setValue($values);
+			
+			if (!$validator->isValid()) {
+				$errors = $validator->getErrors();
+				// TODO fix this
+				$this->log("Creat User Error: " . $errors[0]);
+				continue;
+			}
+			$givenName = $values['givenname'];
+			$familyName = $values['familyname'];
+			
+			$this->log("adding $givenName $familyName");
+			
+			//print_r($values);
+		}
+		return $this;
+	}
+	
+	/**
 	 *
 	 * @return \TCRD\Process
 	 */

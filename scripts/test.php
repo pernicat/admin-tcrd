@@ -7,10 +7,11 @@ define('DEBUG', true);
 /* @var $process TCRD\Process */
 $process = $pimp['TCRD.process'];
 
-$process->run();
+//$process->run();
 
 //$process->newPositions();
 //$process->validatePositionMembers();
 //$process->removeUsersFromPositions();
+$process->createUsers();
 
 print "done\n";

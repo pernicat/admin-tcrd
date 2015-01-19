@@ -2,7 +2,7 @@
 namespace TCRD\Validator;
 
 use TCRD\Worksheet\Roster;
-class UsernameValidator implements ValidatorInterface
+class UsernameValidator extends ValidatorAbstract
 {
 	/**
 	 * 
@@ -12,42 +12,11 @@ class UsernameValidator implements ValidatorInterface
 	
 	/**
 	 * 
-	 * @var string
-	 */
-	protected $value;
-	
-	/**
-	 * 
-	 * @var array
-	 */
-	protected $errors;
-	
-	/**
-	 * 
 	 * @param \TCRD\Worksheet\Roster $roster
 	 */
 	public function __construct(Roster $roster)
 	{
 		$this->roster = $roster;
-	}
-	
-	/**
-	 * (non-PHPdoc)
-	 * @see \TCRD\Validator\ValidatorInterface::setValue()
-	 */
-	public function setValue($value)
-	{
-		$this->value = $value;
-		$this->errors = array();
-	}
-	
-	/**
-	 * (non-PHPdoc)
-	 * @see \TCRD\Validator\ValidatorInterface::getErrors()
-	 */
-	public function getErrors()
-	{
-		return $this->errors;
 	}
 	
 	/**

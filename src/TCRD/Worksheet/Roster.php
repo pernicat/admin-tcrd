@@ -32,6 +32,28 @@ class Roster extends WorksheetContainer
 	}
 	
 	/**
+	 * 
+	 * @return multitype:\Google\Spreadsheet\ListEntry
+	 */
+	public function listNoEmail()
+	{
+		$listFeed = $this->getListFeed();
+		$result = array();	
+		
+		/* @var $entry \Google\Spreadsheet\ListEntry */
+		foreach ($listFeed->getEntries() as $entry) {
+			$values = $entry->getValues();
+			$key = trim(strtolower($values['tcrde-mail']));
+		
+			if (!$key) {
+				$result[] = $entry;
+			}
+		}
+		
+		return $result;
+	}
+	
+	/**
 	 *
 	 * @param string $username
 	 * @return \Google\Spreadsheet\ListEntry|boolean
@@ -76,6 +98,10 @@ class Roster extends WorksheetContainer
 			foreach ($listFeed->getEntries() as $entry) {
 				$values = $entry->getValues();
 				$key = trim(strtolower($values['tcrde-mail']));
+				
+				if (!$key) {
+					continue;
+				}
 				
 				// TODO some error checking
 				$this->emailIndex[$key] = $entry;
