@@ -35,6 +35,12 @@ class Domain
 	
 	/**
 	 * 
+	 * @var array
+	 */
+	public $ignore = array();
+	
+	/**
+	 * 
 	 * @param ClientContainer $clientContainer
 	 * @param array|string $specs
 	 */
@@ -195,4 +201,35 @@ class Domain
 		}
 		return $this->goupIndex;
 	}
+	
+	
+	public function memberInclude($groupKey, $list)
+	{
+
+	}
+	
+	public function memberExclude($groupKey, $list)
+	{
+		$index = $this->getMembersIndex($groupKey);
+		
+		$results = array();
+		
+		/* @var $index \Google_Service_Directory_Member */
+		foreach ($index as $member) {
+			$email = $member->getEmail();
+		
+			if (!in_array($email, $list)) {
+					
+				if (in_array($email, $this->ignore)) {
+					continue;
+				}
+					
+				$results[] = array(
+						'groupKey' => $groupKey,
+						'memberKey' => $email);
+			}
+		}
+		return $results;
+	}
+	
 }

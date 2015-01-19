@@ -47,6 +47,20 @@ class Roster extends WorksheetContainer
 	}
 	
 	/**
+	 * 
+	 * @param string $username
+	 * @return \Google\Spreadsheet\ListEntry|boolean
+	 */
+	public function findMemberKey($username)
+	{
+		if ($entry = $this->findUsername($username)) {
+			$values = $entry->getValues();
+			return $values['tcrde-mail'];
+		}
+		return false;
+	}
+	
+	/**
 	 * special e-mail index due to capitalization issue
 	 * 
 	 * @return Ambigous <multitype:, \Google\Spreadsheet\ListEntry>

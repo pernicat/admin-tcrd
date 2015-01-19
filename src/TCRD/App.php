@@ -45,12 +45,6 @@ class App
 	
 	/**
 	 * 
-	 * @var array
-	 */
-	public $universal = array();
-	
-	/**
-	 * 
 	 * @param Roster $roster
 	 * @param array $domains
 	 */
@@ -250,6 +244,10 @@ class App
 				continue;
 			}
 			
+			if (in_array($email, $this->exempt)) {
+				continue;
+			}
+			
 			$emailParts = explode('@', $email);
 			
 			$username = $emailParts[0];
@@ -303,42 +301,17 @@ class App
 			
 			$groupKey = $values['email'];
 			
-			$memberNames = explode(',', $values['member']);
 			
-			$members = array();
-			
-			foreach ($memberNames as $member) {
-				$userEntity = $this->roster->findUsername(trim($member));
-				if (!$userEntity) {
-					continue;
-				}
-				$userValues = $userEntity->getValues();
-				$members[] = $userValues['tcrde-mail'];
-			}
-			
+			$list = array($this->roster->findMemberKey($values['member']));
 			
 			$memberships = $this->mainDomain->getMembersIndex($groupKey);
 			
-			// TODO give this its own function
-			/* @var $membership \Google_Service_Directory_Member */
-			foreach ($memberships as $membership) {
-				$email = $membership->getEmail();				
-				
-				if (!in_array($email, $members)) {
-					
-					if (in_array($email, $this->universal)) {
-						continue;
-					}
-					
-					$results[] = array(
-							'groupKey' => $groupKey,
-							'memberKey' => $email);
-				}
-			}
+			$excluded = $this->mainDomain->memberExclude($groupKey, $list);
 			
-			//foreach ($members as $member) {
-			//	$this->mainDomain->getMember($email, $member);
-			//}
+			// TODO change this to an array function
+			foreach ($excluded as $exclude) {
+				$results[] = $exclude;
+			}
 			
 		}
 		return $results;

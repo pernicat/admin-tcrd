@@ -31,9 +31,17 @@ class Process
 	 */
 	public function run()
 	{
+		if ($this->isDebug()) {
+			$this->log("running in DEBUG mode");
+		}
+		
 		$this->removeUsers()
 			 ->unremoveUsers()
-			 ->checkMismatches();
+			 ->checkMismatches()
+			 ->validatePositionMembers()
+			 ->newPositions()
+			 ->removeUsersFromPositions()
+		     ;
 		
 		return $this;
 	}
@@ -51,7 +59,9 @@ class Process
 			$this->log($user->getPrimaryEmail() . " -> removing");
 			$user->setSuspended(true);
 			
-			$this->app->updateDomainUser($user);
+			if (!$this->isDebug()) {
+				$this->app->updateDomainUser($user);
+			}
 		}
 		return $this;
 	}
@@ -62,14 +72,16 @@ class Process
 	 */
 	public function unremoveUsers()
 	{
-		$users = $app->listUnsuspendedUsers();
+		$users = $this->app->listUnsuspendedUsers();
 		
 		/* @var $user \Google_Service_Directory_User */
 		foreach ($users as $user) {
 			$this->log($user->getPrimaryEmail() . " -> unremoved");
 			$user->setSuspended(false);
-				
-			$this->app->updateDomainUser($user);
+			
+			if (!$this->isDebug()) {
+				$this->app->updateDomainUser($user);
+			}
 		}
 		return $this;
 	}
@@ -80,7 +92,7 @@ class Process
 	 */
 	public function checkMismatches()
 	{
-		$users = $app->findMissmatchUsers();
+		$users = $this->app->listMissmatchUsers();
 		
 		/* @var $user \Google_Service_Directory_User */
 		foreach ($users as $user) {
@@ -89,6 +101,38 @@ class Process
 		return $this;
 	}
 	
+	/**
+	 *
+	 * @return \TCRD\Process
+	 */
+	public function validatePositionMembers()
+	{
+		$listFeed = $this->app->positions->getListFeed();
+	
+		$results = array();
+	
+		/* @var $entry Google\Spreadsheet\ListEntry */
+		foreach ($listFeed->getEntries() as $entry) {
+			$values = $entry->getValues();
+			$member = $values['member'];
+				
+			$this->usernameValidator->setValue($member);
+			if ($this->usernameValidator->isValid()) {
+				continue;
+			}
+				
+			$errors = $this->usernameValidator->getErrors();
+			foreach ($errors as $error) {
+				$this->log("Position Error: Member " . $error);
+			}
+		}
+		return $this;
+	}
+	
+	/**
+	 * 
+	 * @return \TCRD\Process
+	 */
 	public function newPositions()
 	{
 		$positions = $this->app->listNewPositions();
@@ -96,7 +140,10 @@ class Process
 		
 		/* @var $group \Google_Service_Directory_Group */
 		foreach ($positions as $group) {
-			$directory->groups->insert($group);
+			
+			if (!$this->isDebug()) {
+				$directory->groups->insert($group);
+			}
 			
 			$msg = $group->getName() . ":" . 
 				   $group->getEmail() . " -> position created";
@@ -106,37 +153,30 @@ class Process
 		return $this;
 	}
 	
-	public function validatePositionMembers()
-	{
-		$listFeed = $this->app->positions->getListFeed();
-		
-		$results = array();
-		
-		/* @var $entry Google\Spreadsheet\ListEntry */
-		foreach ($listFeed->getEntries() as $entry) {
-			$values = $entry->getValues();
-			$member = $values['member'];
-			
-			$this->usernameValidator->setValue($member);
-			if ($this->usernameValidator->isValid()) {
-				continue;
-			}
-			
-			$errors = $this->usernameValidator->getErrors();
-			foreach ($errors as $error) {
-				$this->log("Position Error: Member " . $error);
-			}
-		}
-		return $this;
-	}
-	
+	/**
+	 * 
+	 * @return \TCRD\Process
+	 */
 	public function removeUsersFromPositions()
 	{
 		$removals = $this->app->listRemoveUsersFromPositions();
 		foreach ($removals as $removal) {
 			$this->log($removal['groupKey'] . " remove " . $removal['memberKey']);
+			
+			if (!$this->isDebug()) {
+				// TODO
+			}
 		}
 		return $this;
+	}
+	
+	/**
+	 * 
+	 * @return boolean
+	 */
+	public function isDebug()
+	{
+		return (defined('DEBUG') && constant('DEBUG'));
 	}
 	
 	/**
