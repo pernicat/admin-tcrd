@@ -41,6 +41,7 @@ class Process
 			 ->validatePositionMembers()
 			 ->newPositions()
 			 ->removeUsersFromPositions()
+			 ->addusersToPositions()
 		     ;
 		
 		return $this;
@@ -159,10 +160,27 @@ class Process
 	 */
 	public function removeUsersFromPositions()
 	{
-		$removals = $this->app->listRemoveUsersFromPositions();
-		foreach ($removals as $removal) {
-			$this->log($removal['groupKey'] . " remove " . $removal['memberKey']);
+		$keys = $this->app->listRemoveUsersFromPositions();
+		foreach ($keys as $key) {
+			$this->log($key['groupKey'] . " remove " . $key['memberKey']);
 			
+			if (!$this->isDebug()) {
+				// TODO
+			}
+		}
+		return $this;
+	}
+	
+	/**
+	 * 
+	 * @return \TCRD\Process
+	 */
+	public function addusersToPositions()
+	{
+		$keys = $this->app->listAddUsersToPositions();
+		foreach ($keys as $key) {
+			$this->log($key['groupKey'] . " add " . $key['memberKey']);
+				
 			if (!$this->isDebug()) {
 				// TODO
 			}

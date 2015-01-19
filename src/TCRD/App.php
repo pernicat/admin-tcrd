@@ -288,7 +288,10 @@ class App
 		return $results;
 	}
 	
-	
+	/**
+	 * 
+	 * @return multitype:array
+	 */
 	public function listRemoveUsersFromPositions()
 	{
 		$listFeed = $this->positions->getListFeed();
@@ -308,15 +311,37 @@ class App
 			
 			$excluded = $this->mainDomain->memberExclude($groupKey, $list);
 			
-			// TODO change this to an array function
-			foreach ($excluded as $exclude) {
-				$results[] = $exclude;
-			}
-			
+			$results = array_merge($results, $excluded);
 		}
 		return $results;
 	}
 	
+	/**
+	 * 
+	 * @return multitype:array
+	 */
+	public function listAddUsersToPositions()
+	{
+		$listFeed = $this->positions->getListFeed();
+		
+		$results = array();
+		
+		/* @var $entry Google\Spreadsheet\ListEntry */
+		foreach ($listFeed->getEntries() as $entry) {
+			$values = $entry->getValues();
+				
+			$groupKey = $values['email'];
+				
+			$list = array($this->roster->findMemberKey($values['member']));
+				
+			$memberships = $this->mainDomain->getMembersIndex($groupKey);
+				
+			$excluded = $this->mainDomain->memberInclude($groupKey, $list);
+				
+			$results = array_merge($results, $excluded);
+		}
+		return $results;
+	}
 	
 	/**
 	 * 

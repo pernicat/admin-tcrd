@@ -202,12 +202,34 @@ class Domain
 		return $this->goupIndex;
 	}
 	
-	
+	/**
+	 * Returnes members in the list that are not in the group.
+	 *
+	 * @param string $groupKey
+	 * @param string $list An array containing memberKeys
+	 * @return multitype:array containing 'groupKey' and 'memberKey'
+	 */
 	public function memberInclude($groupKey, $list)
-	{
-
+	{		
+		$results = array();
+		
+		foreach ($list as $email) {
+			if (!$this->getMember($groupKey, $email)) {
+				$results[] = array(
+						'groupKey' => $groupKey,
+						'memberKey' => $email);
+			}
+		}
+		return $results;
 	}
 	
+	/**
+	 * Returnes members in group that are not in the list.
+	 * 
+	 * @param string $groupKey
+	 * @param string $list An array containing memberKeys
+	 * @return multitype:array containing 'groupKey' and 'memberKey'
+	 */
 	public function memberExclude($groupKey, $list)
 	{
 		$index = $this->getMembersIndex($groupKey);
