@@ -220,7 +220,15 @@ class Process
 			$this->log($key['groupKey'] . " add " . $key['memberKey']);
 				
 			if (!$this->isDebug()) {
-				// TODO
+				
+				//$member = $this->app->findEmail($key['memberKey']);
+				
+				$member = new \Google_Service_Directory_Member();
+				$member->setEmail($key['memberKey']);
+				//$member->
+				
+				$directory = $this->app->mainDomain->getDirectory();
+				$directory->members->insert($key['groupKey'], $member);
 			}
 		}
 		return $this;

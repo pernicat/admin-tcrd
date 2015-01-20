@@ -190,6 +190,28 @@ class App
 	
 	/**
 	 * 
+	 * @param string $email
+	 * @return string
+	 */
+	public function usernameFromEmail($email)
+	{
+		$parts = explode('@', $email);
+		return $parts[0];
+	}
+	
+	/**
+	 * 
+	 * @param string $email
+	 * @return \TCRD\Ambigous
+	 */
+	public function findEmail($email)
+	{
+		$username = $this->usernameFromEmail($email);
+		return $this->findUsername($username);
+	}
+	
+	/**
+	 * 
 	 * @return multitype:\Google_Service_Directory_User
 	 */
 	public function getDomainUsernameIndex() {
