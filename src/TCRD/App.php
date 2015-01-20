@@ -191,22 +191,11 @@ class App
 	/**
 	 * 
 	 * @param string $email
-	 * @return string
-	 */
-	public function usernameFromEmail($email)
-	{
-		$parts = explode('@', $email);
-		return $parts[0];
-	}
-	
-	/**
-	 * 
-	 * @param string $email
 	 * @return \TCRD\Ambigous
 	 */
 	public function findEmail($email)
 	{
-		$username = $this->usernameFromEmail($email);
+		$username = Util::usernameFromEmail($email);
 		return $this->findUsername($username);
 	}
 	
@@ -223,8 +212,7 @@ class App
 			/* @var $user \Google_Service_Directory_User */
 			foreach ($users as $user) {
 				$email = $user->getPrimaryEmail();
-				$emailParts = explode('@', $email);
-				$username = $emailParts[0];
+				$username = Util::usernameFromEmail($email);
 					
 				if (isset($this->domainIndex['username'][$username])) {
 					continue;
@@ -352,11 +340,13 @@ class App
 		foreach ($listFeed->getEntries() as $entry) {
 			$values = $entry->getValues();
 			
-			if (!$this->mainDomain->getGroup($values['email'])) {
+			if (!$this->mainDomain->getGroupUsername($values['email'])) {
 				
 				$group = new \Google_Service_Directory_Group();
 				
-				$group->setEmail($values['email']);
+				$email = $this->mainDomain->usernameToEmail($values['email']);
+				
+				$group->setEmail($email);
 				$group->setName($values['name']);
 				$group->setDescription($values['description']);
 				
@@ -380,12 +370,14 @@ class App
 		foreach ($listFeed->getEntries() as $entry) {
 			$values = $entry->getValues();
 			
-			$groupKey = $values['email'];
+			$groupKey = $this->mainDomain->usernameToEmail($values['email']);
 			
+			$members = Util::csvToArray($values['member']);
+			$list = $this->roster->findMemberKeys($members);
 			
-			$list = array($this->roster->findMemberKey($values['member']));
-			
-			$memberships = $this->mainDomain->getMembersIndex($groupKey);
+			if (!$this->mainDomain->getGroup($groupKey)) {
+				continue;
+			}
 			
 			$excluded = $this->mainDomain->memberExclude($groupKey, $list);
 			
@@ -408,17 +400,14 @@ class App
 		foreach ($listFeed->getEntries() as $entry) {
 			$values = $entry->getValues();
 				
-			$groupKey = $values['email'];
+			$groupKey = $this->mainDomain->usernameToEmail($values['email']);
 				
-			$username = $this->roster->findMemberKey($values['member']);
-			
-			if (!$username) {
+			$members = Util::csvToArray($values['member']);
+			$list = $this->roster->findMemberKeys($members);
+				
+			if (!$this->mainDomain->getGroup($groupKey)) {
 				continue;
 			}
-			
-			$list = array($username);
-				
-			$memberships = $this->mainDomain->getMembersIndex($groupKey);
 				
 			$excluded = $this->mainDomain->memberInclude($groupKey, $list);
 				

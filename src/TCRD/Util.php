@@ -20,4 +20,37 @@ class Util
 		}
 		return implode($pass); //turn the array into a string
 	}
+	
+	/**
+	 *
+	 * @param string $email
+	 * @return string
+	 */
+	static public function usernameFromEmail($email)
+	{
+		$parts = explode('@', $email);
+		return $parts[0];
+	}
+	
+	/**
+	 *
+	 * @param string $email
+	 * @return string
+	 */
+	static public function domainFromEmail($email)
+	{
+		return substr(strrchr($email, '@'), 1);
+	}
+	
+	/**
+	 * 
+	 * @param string $string
+	 * @param string $delimiter
+	 * @return array
+	 */
+	static public function csvToArray($string, $delimiter = ',')
+	{
+		$values = explode($delimiter, $string);
+		return array_map('trim', $values);
+	}
 }

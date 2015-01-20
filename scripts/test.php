@@ -2,7 +2,7 @@
 <?php
 require_once realpath('bootstrap.php');
 
-//define('DEBUG', true);
+define('DEBUG', true);
 
 /* @var $process TCRD\Process */
 $process = $pimp['TCRD.process'];
@@ -11,10 +11,10 @@ $process = $pimp['TCRD.process'];
 
 //$process->unremoveUsers();
 
-//$process->newPositions();
-//$process->validatePositionMembers();
-//$process->removeUsersFromPositions();
-$process->addusersToPositions();
+$process->newPositions();
+$process->validatePositionMembers();
+$process->removeUsersFromPositions();
+$process->addUsersToPositions();
 //$process->createUsers();
 
 //print $process->app->getNextDomain()->getName();

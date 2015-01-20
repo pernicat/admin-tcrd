@@ -35,14 +35,26 @@ class Process
 			$this->log("running in DEBUG mode");
 		}
 		
+		// TODO add share to all groups
+		// TODO add info to empty groups
+		// TODO filter postions
+		// TODO filter users
+		
+		
 		$this->removeUsers()
 			 ->unremoveUsers()
+			 // TODO new users
+			 // TODO email new users
 			 ->checkMismatches()
 			 ->validatePositionMembers()
 			 ->newPositions()
 			 ->removeUsersFromPositions()
 			 ->addusersToPositions()
+			 // TODO remove users from groups
+			 // TODO add users to groups
 		     ;
+		
+		// TODO e-mail it
 		
 		return $this;
 	}
@@ -150,10 +162,17 @@ class Process
 	
 		$results = array();
 	
-		/* @var $entry Google\Spreadsheet\ListEntry */
+		$members = array();
 		foreach ($listFeed->getEntries() as $entry) {
 			$values = $entry->getValues();
 			$member = $values['member'];
+			$split = Util::csvToArray($member);
+			$members = array_merge($members, $split);
+		}
+		
+		
+		/* @var $entry Google\Spreadsheet\ListEntry */
+		foreach ($members as $member) {
 				
 			$this->usernameValidator->setValue($member);
 			if ($this->usernameValidator->isValid()) {
@@ -213,20 +232,16 @@ class Process
 	 * 
 	 * @return \TCRD\Process
 	 */
-	public function addusersToPositions()
+	public function addUsersToPositions()
 	{
 		$keys = $this->app->listAddUsersToPositions();
 		foreach ($keys as $key) {
 			$this->log($key['groupKey'] . " add " . $key['memberKey']);
 				
 			if (!$this->isDebug()) {
-				
-				//$member = $this->app->findEmail($key['memberKey']);
-				
 				$member = new \Google_Service_Directory_Member();
 				$member->setEmail($key['memberKey']);
-				//$member->
-				
+	
 				$directory = $this->app->mainDomain->getDirectory();
 				$directory->members->insert($key['groupKey'], $member);
 			}

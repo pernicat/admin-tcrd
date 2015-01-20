@@ -36,7 +36,7 @@ class Domain implements \Countable
 	 * 
 	 * @var array
 	 */
-	protected $goupIndex;
+	protected $groupIndex;
 	
 	/**
 	 * 
@@ -105,6 +105,11 @@ class Domain implements \Countable
 		return $this->specs['name'];
 	}
 	
+	public function usernameToEmail($username)
+	{
+		return $username . '@' . $this->getName();
+	}
+	
 	/**
 	 * 
 	 * @param array $parms
@@ -166,6 +171,10 @@ class Domain implements \Countable
 	{
 		if (!isset($this->membersIndex[$groupKey])) {
 			
+			if (!$this->getGroup($groupKey)) {
+				throw new \Exception("group '$groupKey' does not exist");
+			}
+			
 			$this->membersIndex[$groupKey] = array();
 			
 			$directory = $this->getDirectory();
@@ -180,6 +189,11 @@ class Domain implements \Countable
 		return $this->membersIndex[$groupKey];
 	}
 	
+	public function getGroupUsername($username)
+	{
+		return $this->getGroup($this->usernameToEmail($username));
+	}
+	
 	/**
 	 * 
 	 * @param string $name
@@ -189,7 +203,7 @@ class Domain implements \Countable
 	{
 		$index = $this->getGroupIndex();
 		
-		if (isset($index[$name])) {
+		if (array_key_exists($name, $index)) {
 			return $index[$name];
 		}
 		return false;
@@ -201,21 +215,20 @@ class Domain implements \Countable
 	 */
 	public function getGroupIndex()
 	{
-		if (null == $this->goupIndex) {
-			$this->goupIndex =  array();
+		if (null == $this->groupIndex) {
+			$this->groupIndex =  array();
 			
 			$groups = $this->listGroups();
 			
 			/* @var $group Google_Service_Directory_Group */
 			foreach ($groups as $group) {
-
-				$email = $group->getEmail();
 				
-				$this->goupIndex[$email] = $group;
+				$email = $group->getEmail();
+				$this->groupIndex[$email] = $group;
 			
 			}
 		}
-		return $this->goupIndex;
+		return $this->groupIndex;
 	}
 	
 	/**

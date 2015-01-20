@@ -70,6 +70,22 @@ class Roster extends WorksheetContainer
 	
 	/**
 	 * 
+	 * @param array $members
+	 * @return multitype:string
+	 */
+	public function findMemberkeys($members)
+	{
+		$results = array();
+		foreach ($members as $username) {
+			if ($email = $this->findMemberKey($username)) {
+				$results[] = $email;
+			}
+		}
+		return $results;
+	}
+	
+	/**
+	 * 
 	 * @param string $username
 	 * @return \Google\Spreadsheet\ListEntry|boolean
 	 */
@@ -89,26 +105,7 @@ class Roster extends WorksheetContainer
 	 */
 	public function getEmailIndex() 
 	{
-		if (null == $this->emailIndex) {
-			$this->emailIndex = array();
-			
-			$listFeed = $this->getListFeed();
-			
-			/* @var $entry Google\Spreadsheet\ListEntry */
-			foreach ($listFeed->getEntries() as $entry) {
-				$values = $entry->getValues();
-				$key = trim(strtolower($values['tcrde-mail']));
-				
-				if (!$key) {
-					continue;
-				}
-				
-				// TODO some error checking
-				$this->emailIndex[$key] = $entry;
-			}
-		}
-		return $this->emailIndex;
-		
+		return $this->getIndex('tcrde-mail');
 	}
 	
 	/**
@@ -121,19 +118,14 @@ class Roster extends WorksheetContainer
 		if (null == $this->usernameIndex) {
 			$this->usernameIndex = array();
 				
-			$listFeed = $this->getListFeed();
+			$emailIndex = $this->getEmailIndex();
 				
 			/* @var $entry Google\Spreadsheet\ListEntry */
-			foreach ($listFeed->getEntries() as $entry) {
-				$values = $entry->getValues();
-				$key = trim(strtolower($values['username']));
-	
-				// TODO some error checking
-				$this->usernameIndex[$key] = $entry;
+			foreach ($emailIndex as $key => $values) {
+				$this->usernameIndex[\TCRD\Util::usernameFromEmail($key)] = $values;
 			}
 		}
 		return $this->usernameIndex;
-	
 	}
 	
 	/**
