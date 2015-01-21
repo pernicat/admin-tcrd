@@ -1,13 +1,13 @@
 <?php
 namespace TCRD\Wrapper;
 
-class ColletionWrapper implements \Iterator, \Countable, \ArrayAccess
+class ColletionWrapper extends ModelWrapper implements \Iterator, \Countable
 {
 	/**
 	 * 
 	 * @var \Google_Collection
 	 */
-	protected $collection;
+	protected $object;
 	
 	/**
 	 * 
@@ -16,34 +16,107 @@ class ColletionWrapper implements \Iterator, \Countable, \ArrayAccess
 	protected $uniqueIndex = array();
 	
 
+	/**
+	 * 
+	 * @var multitype:\TCRD\Wrapper\ModelWrapper
+	 */
 	protected $wrapped = array();
 	
+	/**
+	 * 
+	 * @var integer
+	 */
 	protected $position = 0;
 	
-	protected $itemClass;
+	/**
+	 * 
+	 * @var string
+	 */
+	protected $itemClass = '\\TCRD\\Wrapper\\ModelWrapper';
+	
+	/**
+	 * 
+	 * @var array
+	 */
+	protected $itemClassArgs = array();
 	
 	/**
 	 * 
 	 * @param \Google_Collection $collection
 	 */
-	public function __construct(\Google_Collection $collection)
+	public function __construct(\Google_Collection $collection, $args = null)
 	{
-		$this->collection = $collection;
+		parent::__construct($collection, $args);
 	}
 	
+	/**
+	 * 
+	 * @param string $class
+	 * @throws \Exception
+	 * @return \TCRD\Wrapper\ColletionWrapper
+	 */
+	public function setItemClass($class, $args = null)
+	{
+		if (0 < count($this->wrapped)) {
+			// resets the caching
+			$this->wrapped = array();
+			$this->uniqueIndex = array();
+		}
+		
+		if (!class_exists($class)) {
+			throw new \Exception("Class '$class' does not exist");
+		}
+		$this->itemClass = $class;
+		$this->itemClassArgs = $args;
+		return $this;
+	}
 	
+	/**
+	 * 
+	 * @param scalar $field
+	 * @param scalar $value
+	 * @return \TCRD\Wrapper\ModelWrapper
+	 */
 	public function findUnique($field, $value)
 	{
+		$index = $this->getUniqueIndex($field);
 		
+		if (isset($index[$value])) {
+			return $index[$value];
+		}
+		return null;
 	}
 	
+	/**
+	 * 
+	 * @param scalar $field
+	 * @throws \Exception
+	 * @return multitype:\TCRD\Wrapper\ModelWrapper
+	 */
 	public function getUniqueIndex($field)
 	{
 		if (!isset($this->uniqueIndex[$field])) {
 			$this->uniqueIndex[$field] = array();
 			
+			/* @var $item \TCRD\Wrapper\ModelWrapper */
 			foreach ($this as $item) {
+				if (!isset($item->$field)) {
+					$class = get_class($item->getObject());
+					
+					throw new \Exception("Field '$field' does not exist for class '$class'");
+				}
+				$value = $item->$field;
 				
+				if (!is_scalar($value)) {
+					$type = gettype($value);
+					throw new \Exception("Field '$field' is not a scalar value, it is a '$type'");
+				}
+				
+				if (isset($this->uniqueIndex[$field][$value])) {
+					throw new \Exception("Field '$field' is not unique, '$value' exist more than once");
+				}
+				
+				$this->uniqueIndex[$field][$value] = $item;
 			}
 			
 		}
@@ -52,13 +125,12 @@ class ColletionWrapper implements \Iterator, \Countable, \ArrayAccess
 	
 	/**
 	 * 
-	 * @param mixed $item
-	 * @return mixed
+	 * @param \Google_Model $item
+	 * @return \TCRD\Wrapper\ModelWrapper
 	 */
-	public function wrapItem($item)
+	public function wrapItem(\Google_Model $item)
 	{
-		// TODO wrap item
-		return $item;
+		return new $this->itemClass($item);
 	}
 
 	/**
@@ -80,53 +152,42 @@ class ColletionWrapper implements \Iterator, \Countable, \ArrayAccess
     }
 
     /**
-     * 
+     * @return scalar
      */
     function key() 
     {
-        
-        return $this->collection->key();
+        return $this->position;
     }
 
     /**
-     * 
+     * @return \TCRD\Wrapper\ModelWrapper
      */
     function next() 
     {
-
-        $this->collection->next();
+		++$this->position;
     }
 
     /**
-     * 
+     * @return boolean
      */
     function valid() 
     {
-
-        return $this->collection->valid();
+        return $this->offsetExists($this->position);
     }
 	
     /**
-     * 
+     * @return integer
      */
     public function count()
     {
-    	return $this->collection->count();
+    	// TODO;
+    	return $this->object->count();
     }
     
     /**
      * 
      * @param scalar $offset
-     */
-    public function offsetExists ($offset)
-    {
-    	return $this->collection->offsetExists($offset);
-    }
-    
-    /**
-     * 
-     * @param scalar $offset
-     * @return multitype:
+     * @return \TCRD\Wrapper\ModelWrapper:
      */
     public function offsetGet($offset)
     {
@@ -140,16 +201,13 @@ class ColletionWrapper implements \Iterator, \Countable, \ArrayAccess
     /**
      * 
      * @param scalar $offset
-     * @param mixed $value
+     * @param \TCRD\Wrapper\ModelWrapper $value
      * @throws \Exception
      */
-    public function offsetSet($offset, $value)
+    public function offsetSet($offset, \TCRD\Wrapper\ModelWrapper $value)
     {
-    	if ($this->itemClass && !is_subclass_of($value, $this->itemClass)) {
-    		$class = get_class($value);
-    		throw new \Exception("value must be subclass of '{$this->itemClass}' but is '$class'");
-    	}
     	$this->wrapped[$offset] = $value;
+    	$this->object->offsetSet($value->getObject());
     }
     
     /**

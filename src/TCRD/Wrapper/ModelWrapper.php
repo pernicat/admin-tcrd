@@ -7,24 +7,103 @@ class ModelWrapper implements \ArrayAccess
 	 * 
 	 * @var \Google_Model
 	 */
-	protected $model;
+	protected $object;
 	
 	/**
 	 * 
-	 * @param \Google_Model $model
+	 * @param \Google_Model $object
+	 * @param mixed $args
 	 */
-	public function __construct(\Google_Model $model)
+	public function __construct(\Google_Model $object, $config = null)
 	{
-		$this->model = $model;
+		$this->object = $object;
+		$this->configure($config);
+	}
+	
+	/**
+	 * 
+	 * @param mixed $config
+	 * @return \TCRD\Wrapper\ModelWrapper
+	 */
+	protected function configure($config)
+	{
+		if (!$config) {
+			return $this;
+		}
+		if (!is_array($config) && !($config instanceof \Traversable)) {
+			return $this;
+		}
+		
+		foreach ($config as $key => $value) {
+			
+			$methodName = 'set' . ucfirst($value);
+			
+			if (method_exists($this, $methodName)) {
+				call_user_func(array($this, $methodName));
+			}
+		}
+		// TODO error checking;
+		
+		return $this;
 	}
 	
 	/**
 	 * 
 	 * @return Google_Model
 	 */
-	public function getModel()
+	public function getObject()
 	{
-		return $this->model;
+		return $this->object;
+	}
+	
+	/**
+	 * 
+	 * @param scalar $key
+	 * @return mixed
+	 */
+	public function __get($key)
+	{
+		return $this->object->$key;
+	}
+	
+	/**
+	 * 
+	 * @param scalar $key
+	 * @param mixed $value
+	 */
+	public function __set($key, $value)
+	{
+		$this->object->$key = $value;
+	}
+	
+	/**
+	 * 
+	 * @param unknown $key
+	 * @return boolean
+	 */
+	public function __isset($key)
+	{
+		return isset($this->object->$key);
+	}
+	
+	/**
+	 * 
+	 * @param scalar $key
+	 */
+	public function __unset($key)
+	{
+		unset($this->object->$key);
+	}
+	
+	/**
+	 * 
+	 * @param string $name
+	 * @param array $args
+	 * @return mixed
+	 */
+	public function __call($name, $args)
+	{
+		return call_user_func_array(array($this->object, $name), $args);
 	}
 	
 	/**
@@ -33,7 +112,7 @@ class ModelWrapper implements \ArrayAccess
 	 */
 	public function offsetExists($offset)
 	{
-		return $this->model->offsetExists($offset);
+		return $this->object->offsetExists($offset);
 	}
 	
 	/**
@@ -42,7 +121,7 @@ class ModelWrapper implements \ArrayAccess
 	 */
 	public function offsetGet($offset)
 	{
-		return $this->model->offsetGet($offset);
+		return $this->object->offsetGet($offset);
 	}
 	
 	/**
@@ -51,7 +130,7 @@ class ModelWrapper implements \ArrayAccess
 	 */
 	public function offsetSet($offset, $value)
 	{
-		$this->model->offsetSet($offset, $value);
+		$this->object->offsetSet($offset, $value);
 	}
 	
 	/**
@@ -60,6 +139,6 @@ class ModelWrapper implements \ArrayAccess
 	 */
 	public function offsetUnset($offset)
 	{
-		$this->model->offsetUnset($offset);
+		$this->object->offsetUnset($offset);
 	}
 }
