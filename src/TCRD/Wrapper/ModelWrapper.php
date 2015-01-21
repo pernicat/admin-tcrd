@@ -22,6 +22,87 @@ class ModelWrapper implements \ArrayAccess
 	
 	/**
 	 * 
+	 * @param array $array
+	 * @return \TCRD\Wrapper\ModelWrapper
+	 */
+	public function hydrate($array)
+	{
+
+	}
+	
+	protected function recursiveHydrate($object, $key, $value)
+	{
+		$class = get_class($object);
+		
+		
+		$className = $class . ucfirst($key);
+		if (class_exists($className)) {
+			$myClass;
+		}
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		foreach ($array as $key => $value) {
+			
+		
+		}
+		
+		
+		
+		foreach ($array as $key => $value) {
+			if (!is_array($value)) {
+				$this->object->$key = $value;
+				continue;
+			}
+			if (isset($value[0])) {
+				$this->object->$key = $value;
+
+			}
+			
+			
+		}
+		return $this;
+	}
+	
+	/**
+	 * 
+	 * @return multitype:\TCRD\Wrapper\mixed
+	 */
+	public function toArray()
+	{
+		return $this->recursiveArray(get_object_vars($this->object));
+	}
+	
+	/**
+	 * 
+	 * @param $array
+	 * @return multitype:mixed
+	 */
+	protected function recursiveArray($array)
+	{
+		foreach ($array as $key => $value) {
+			if (is_object($value)) {
+				$value = get_object_vars($value);
+			}
+			
+			if (is_array($value)) {
+				$array[$key] = $this->recursiveArray($value);
+			}
+		}
+		
+		return $array;
+	}
+	
+	/**
+	 * 
 	 * @param mixed $config
 	 * @return \TCRD\Wrapper\ModelWrapper
 	 */
