@@ -131,9 +131,9 @@ class Roster extends WorksheetContainer
 	/**
 	 * 
 	 * @param string $name
-	 * @return string
+	 * @return string|boolean
 	 */
-	public function findClosestUsername($name)
+	public function findClosestUsername($name, $limit = -1)
 	{
 		$usernames = $this->getUsernameIndex();
 		
@@ -152,6 +152,10 @@ class Roster extends WorksheetContainer
 				$closest  = $key;
 				$shortest = $lev;
 			}
+		}
+		
+		if (0 <= $limit || $shortest > $limit) {
+			return false;
 		}
 		
 		return $closest;

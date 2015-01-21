@@ -35,7 +35,7 @@ class Process
 			$this->log("running in DEBUG mode");
 		}
 		
-		// TODO add share to all groups
+		
 		// TODO add info to empty groups
 		// TODO filter postions
 		// TODO filter users
@@ -45,6 +45,7 @@ class Process
 			 ->unremoveUsers()
 			 // TODO new users
 			 // TODO email new users
+			 // TODO verify all users exist
 			 ->checkMismatches()
 			 ->validatePositionMembers()
 			 ->newPositions()
@@ -52,6 +53,10 @@ class Process
 			 ->addusersToPositions()
 			 // TODO remove users from groups
 			 // TODO add users to groups
+			 
+		     
+		     // TODO make sure all users are in broadcast
+		     // TODO add share to all groups
 		     ;
 		
 		// TODO e-mail it

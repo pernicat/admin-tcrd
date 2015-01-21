@@ -7,16 +7,17 @@ define('DEBUG', true);
 /* @var $process TCRD\Process */
 $process = $pimp['TCRD.process'];
 
-//$process->run();
+// $process->run();
 
-//$process->unremoveUsers();
+// $process->unremoveUsers();
 
-$process->newPositions();
-$process->validatePositionMembers();
-$process->removeUsersFromPositions();
-$process->addUsersToPositions();
-//$process->createUsers();
+// $process->newPositions();
+// $process->validatePositionMembers();
+// $process->removeUsersFromPositions();
+// $process->addUsersToPositions();
+// $process->createUsers();
 
 //print $process->app->getNextDomain()->getName();
+print levenshtein('beth.quartz', 'bethany.quartz'); 
 
 print "done\n";

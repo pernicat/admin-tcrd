@@ -1,7 +1,7 @@
 <?php
 namespace TCRD\Filter;
 
-abstract class FilterAbstract
+abstract class FilterAbstract implements FilterInterface
 {
 	/**
 	 * 
@@ -23,7 +23,7 @@ abstract class FilterAbstract
 	
 	/**
 	 * 
-	 * @param unknown $value
+	 * @param mixed $value
 	 * @return \TCRD\Filter\FilterAbstract
 	 */
 	public function setValue($value)
@@ -31,6 +31,11 @@ abstract class FilterAbstract
 		$this->change = false;
 		$this->messages = array();
 		return $this;
+	}
+	
+	public function getValue()
+	{
+		return $this->value;
 	}
 	
 	/**
@@ -44,9 +49,12 @@ abstract class FilterAbstract
 	
 	/**
 	 * 
-	 * @return mixed;
+	 * @return multitype:string
 	 */
-	public function filter();
+	public function getMessages()
+	{
+		return $this->messages;
+	}
 	
 	/**
 	 * 
