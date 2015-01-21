@@ -37,27 +37,38 @@ class Process
 		
 		
 		// TODO add info to empty groups
-		// TODO filter postions
-		// TODO filter users
 		
 		
+		/* Users */
 		$this->removeUsers()
 			 ->unremoveUsers()
 			 // TODO new users
 			 // TODO email new users
 			 // TODO verify all users exist
-			 ->checkMismatches()
+			 ->checkMismatches();
+			 
+		// TODO list suspended;
+		
+		/* Positions */
+		$this
+			 ->filterPositions()
 			 ->validatePositionMembers()
 			 ->newPositions()
 			 ->removeUsersFromPositions()
-			 ->addusersToPositions()
+			 ->addusersToPositions();
+		
+		
+		
+		
+		
+		
 			 // TODO remove users from groups
 			 // TODO add users to groups
 			 
 		     
 		     // TODO make sure all users are in broadcast
 		     // TODO add share to all groups
-		     ;
+		     
 		
 		// TODO e-mail it
 		

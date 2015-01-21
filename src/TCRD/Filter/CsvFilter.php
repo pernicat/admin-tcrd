@@ -18,6 +18,10 @@ class CsvFilter extends FilterAbstract
 		$this->filter = $filter;
 	}
 	
+	/**
+	 * (non-PHPdoc)
+	 * @see \TCRD\Filter\FilterInterface::filter()
+	 */
 	public function filter()
 	{
 		$exploded = explode(',', $this->value);
