@@ -23,11 +23,19 @@ abstract class FilterAbstract implements FilterInterface
 	
 	/**
 	 * 
+	 * @var string
+	 */
+	protected $original;
+	
+	/**
+	 * 
 	 * @param mixed $value
 	 * @return \TCRD\Filter\FilterAbstract
 	 */
 	public function setValue($value)
 	{
+		$this->value = $value;
+		$this->original = $value;
 		$this->change = false;
 		$this->messages = array();
 		return $this;
@@ -38,13 +46,9 @@ abstract class FilterAbstract implements FilterInterface
 		return $this->value;
 	}
 	
-	/**
-	 * 
-	 * @param string $msg
-	 */
-	public function addMessage($msg)
+	public function getOriginal()
 	{
-		$this->messages[] = $msg;
+		return $this->original;
 	}
 	
 	/**
@@ -60,8 +64,24 @@ abstract class FilterAbstract implements FilterInterface
 	 * 
 	 * @return \TCRD\Filter\FilterAbstract
 	 */
-	public function setChange() 
+	protected function updateValue($value, $msg = null) 
 	{
+		if (is_array($msg)) {
+			$this->messages = array_merge($this->messages, $msg);
+		}
+		elseif (is_string($msg)) {
+			$this->messages[] = $msg;
+		}
+		elseif (null === $msg) {
+			$this->messages[] = "'{$this->value}' -> '{$value}'";
+		}
+		else {
+			throw new \Exception('Unknown $msg type');
+		}
+		
+		$this->original = $this->value;
+		$this->value = $value;
+		
 		$this->change = true;
 		return $this;
 	}

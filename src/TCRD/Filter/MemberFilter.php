@@ -30,12 +30,17 @@ class MemberFilter extends FilterAbstract
 	 */
 	public function filter()
 	{
+		
+		$trimed = trim($this->value);
+		
+		if ($trimed !== $this->value) {
+			$this->updateValue($trimed, "Filtering '{$this->value}' removing whitespace.");
+		}
+		
 		$lower = strtolower($this->value);
 		
 		if ($lower !== $this->value) {
-			$this->setChange();
-			$this->addMessage("Filtering '{$this->value}' to lowercase.");
-			$this->value = $lower;
+			$this->updateValue($lower, "Filtering '{$this->value}' to lowercase.");
 		}
 		
 		if ($this->roster->findUsername($this->value)) {
@@ -50,9 +55,8 @@ class MemberFilter extends FilterAbstract
 			return $this->value;
 		}
 		
+		$this->updateValue($levin, "Filtering '{$this->value}' to close match '$levin'.");
 		
-		$this->setChange();
-		$this->addMessage("Filtering '{$this->value}' to closest match '$leven'.");
-		return $this->value = $levin;
+		return $this->getValue();
 	}
 }

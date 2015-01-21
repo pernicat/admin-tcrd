@@ -65,6 +65,36 @@ class Process
 	}
 	
 	/**
+	 * filters all of the positions data and cleans it if neccesary.
+	 * @return \TCRD\Process
+	 */
+	public function filterPositions()
+	{
+		$listFeed = $this->app->positions->getListFeed();
+		
+		$filter = $this->app->positionsFilter;
+		
+		/* @var $entry \Google\Spreadsheet\ListEntry */
+		foreach ($listFeed->getEntries() as $entry) {
+			$values = $entry->getValues();
+			
+			$filter->setValue($values);
+			$filter->filter();
+			
+			if ($filter->hasChanged()) {
+				array_map(array($this, 'log'), $filter->getMessages());
+			}
+			
+			if (!$this->isDebug()) {
+				$entry->update($filter->getValue());
+			}
+			
+		}
+		
+		return $this;
+	}
+	
+	/**
 	 * checks roster for missing users to suspend and disable.
 	 * @return Process
 	 */

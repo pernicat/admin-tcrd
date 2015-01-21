@@ -154,7 +154,7 @@ class Roster extends WorksheetContainer
 			}
 		}
 		
-		if (0 <= $limit || $shortest > $limit) {
+		if (0 <= $limit && $shortest > $limit) {
 			return false;
 		}
 		

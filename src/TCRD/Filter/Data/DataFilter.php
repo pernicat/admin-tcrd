@@ -71,7 +71,7 @@ class DataFilter extends \TCRD\Filter\FilterAbstract
 			$filter->filter();
 			
 			if ($filter->hasChanged()) {
-				$this->setChange();
+				$this->change = true;
 				$this->messages = array_merge($this->messages, $filter->getMessages());
 				$this->value[$field] = $filter->getValue();
 			}

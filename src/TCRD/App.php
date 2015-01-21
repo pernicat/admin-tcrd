@@ -45,6 +45,12 @@ class App
 	
 	/**
 	 * 
+	 * @var Filter\Data\DataFilter
+	 */
+	public $positionsFilter;
+	
+	/**
+	 * 
 	 * @param Roster $roster
 	 * @param array $domains
 	 */

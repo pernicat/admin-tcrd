@@ -9,6 +9,9 @@ $process = $pimp['TCRD.process'];
 
 // $process->run();
 
+$process->filterPositions();
+$process->validatePositionMembers();
+
 // $process->unremoveUsers();
 
 // $process->newPositions();
@@ -18,6 +21,6 @@ $process = $pimp['TCRD.process'];
 // $process->createUsers();
 
 //print $process->app->getNextDomain()->getName();
-print levenshtein('beth.quartz', 'bethany.quartz'); 
+//print levenshtein('beth.quartz', 'bethany.quartz'); 
 
 print "done\n";
