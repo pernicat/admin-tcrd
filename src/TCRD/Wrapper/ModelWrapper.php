@@ -27,49 +27,39 @@ class ModelWrapper implements \ArrayAccess
 	 */
 	public function hydrate($array)
 	{
-
+		$this->recursiveHydrate($this->object, $array, true);
+		return $this;
 	}
 	
-	protected function recursiveHydrate($object, $key, $value)
+	/**
+	 * 
+	 * @param \Google_Model $object
+	 * @param array $array
+	 * @param boolean $hasMethods
+	 * @return Google_Model
+	 */
+	protected function recursiveHydrate(\Google_Model $object, $array, $hasMethods = false)
 	{
-		$class = get_class($object);
-		
-		
-		$className = $class . ucfirst($key);
-		if (class_exists($className)) {
-			$myClass;
-		}
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
 		foreach ($array as $key => $value) {
-			
-		
-		}
-		
-		
-		
-		foreach ($array as $key => $value) {
-			if (!is_array($value)) {
-				$this->object->$key = $value;
+				
+			$methodName = 'hydrate' . ucfirst($key);
+			if ($hasMethods && method_exists($this, $methodName)) {
+				$object->$key = $this->$methodName($value);
 				continue;
 			}
-			if (isset($value[0])) {
-				$this->object->$key = $value;
-
+				
+			if (!is_array($value)) {
+				$object->$key = $value;
+				continue;
 			}
-			
-			
+				
+			$className = get_class($object) . ucfirst($key);
+			if (class_exists($className)) {
+				$myClass = new $className();
+				$object->$key = $this->recursiveHydrate($myClass, $value);
+			}
 		}
-		return $this;
+		return $object;
 	}
 	
 	/**
@@ -144,6 +134,11 @@ class ModelWrapper implements \ArrayAccess
 	 */
 	public function __get($key)
 	{
+		$methodName = 'get' . ucfirst($key);
+		if (method_exists($this, $methodName)) {
+			return $this->$methodName;
+		}
+		
 		return $this->object->$key;
 	}
 	
@@ -154,6 +149,11 @@ class ModelWrapper implements \ArrayAccess
 	 */
 	public function __set($key, $value)
 	{
+		$methodName = 'set' . ucfirst($key);
+		if (method_exists($this, $methodName)) {
+			$this->$methodName($value);
+			return;
+		}
 		$this->object->$key = $value;
 	}
 	
@@ -164,6 +164,10 @@ class ModelWrapper implements \ArrayAccess
 	 */
 	public function __isset($key)
 	{
+		$methodName = 'get' . ucfirst($key);
+		if (method_exists($this, $methodName)) {
+			return true;
+		}
 		return isset($this->object->$key);
 	}
 	
@@ -193,7 +197,7 @@ class ModelWrapper implements \ArrayAccess
 	 */
 	public function offsetExists($offset)
 	{
-		return $this->object->offsetExists($offset);
+		return $this->__isset($offset);
 	}
 	
 	/**
@@ -201,8 +205,8 @@ class ModelWrapper implements \ArrayAccess
 	 * @see ArrayAccess::offsetGet()
 	 */
 	public function offsetGet($offset)
-	{
-		return $this->object->offsetGet($offset);
+	{	
+		return $this->__get($offset);
 	}
 	
 	/**
@@ -211,7 +215,7 @@ class ModelWrapper implements \ArrayAccess
 	 */
 	public function offsetSet($offset, $value)
 	{
-		$this->object->offsetSet($offset, $value);
+		$this->__set($offset, $value);
 	}
 	
 	/**
@@ -220,6 +224,6 @@ class ModelWrapper implements \ArrayAccess
 	 */
 	public function offsetUnset($offset)
 	{
-		$this->object->offsetUnset($offset);
+		$this->__unset($offset);
 	}
 }

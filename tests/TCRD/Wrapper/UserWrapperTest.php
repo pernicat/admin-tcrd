@@ -29,15 +29,52 @@ class UserWrapperTest extends PHPUnit_Framework_TestCase
 		$this->assertEquals($wrapped->getName(), $user->name);
 		
 		$values = $wrapped->toArray();
-		print_r($wrapped->toArray());
+		//print_r($wrapped->toArray());
 		
 		$this->assertEquals($user->addresses[0]->type, $values['addresses'][0]['type'] );
 		
-		print_r(get_class($wrapped->getObject()));
+		//print_r(get_class($wrapped->getObject()));
 	}
 	
-	public function userProvider()
+	public function testHydrator()
 	{
+		$userArray = $this->userArrayProvider();
+		$user = new Google_Service_Directory_User();
+		$wrappedUser = new TCRD\Wrapper\UserWrapper($user);
 		
+		$wrappedUser->hydrate($userArray);
+		
+		$this->assertEquals('tony.pernicano@tcrollerderby.com', $user->primaryEmail);
+		$this->assertEquals('Tony', $user->name->givenName);
+		
+		$this->assertInstanceOf('Google_Service_Directory_UserName', $user->name);
+		
+		foreach ($userArray['addresses'] as $key => $addressArray) {
+			$this->assertArrayHasKey($key, $wrappedUser->addresses);
+			$this->assertInstanceOf('Google_Service_Directory_UserAddress', $user->addresses[$key]);
+			$this->assertEquals($addressArray['locality'], $user->addresses[$key]->locality);
+		}
+	}
+	
+	public function userArrayProvider()
+	{
+		return array(
+				'primaryEmail' => 'tony.pernicano@tcrollerderby.com',
+				'name' => array(
+						'givenName' => 'Tony',
+						'familyName' => 'Pernicano',
+						'fullName' => 'Tony Pernicano'
+				),
+				'addresses' => array(
+						array(
+								'type' => 'Home',
+								'customType' => '',
+								'streetAddress' => '1234 Bad Rd',
+								'locality' => 'Detroit',
+								'region' => 'MI',
+								'postalCode' => '49675',
+						)
+				)	
+		);
 	}
 }

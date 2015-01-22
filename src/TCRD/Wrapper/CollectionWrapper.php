@@ -1,7 +1,7 @@
 <?php
 namespace TCRD\Wrapper;
 
-class ColletionWrapper extends ModelWrapper implements \Iterator, \Countable
+class CollectionWrapper extends ModelWrapper implements \Iterator, \Countable
 {
 	/**
 	 * 
@@ -73,6 +73,7 @@ class ColletionWrapper extends ModelWrapper implements \Iterator, \Countable
 	
 	/**
 	 * 
+	 * 
 	 * @param scalar $field
 	 * @param scalar $value
 	 * @return \TCRD\Wrapper\ModelWrapper
@@ -95,6 +96,8 @@ class ColletionWrapper extends ModelWrapper implements \Iterator, \Countable
 	 */
 	public function getUniqueIndex($field)
 	{
+		// TODO impliment subFields
+		
 		if (!isset($this->uniqueIndex[$field])) {
 			$this->uniqueIndex[$field] = array();
 			
@@ -134,7 +137,7 @@ class ColletionWrapper extends ModelWrapper implements \Iterator, \Countable
 	}
 
 	/**
-	 * 
+	 * resets the iterator to zero
 	 */
     function rewind() 
     {
@@ -142,6 +145,7 @@ class ColletionWrapper extends ModelWrapper implements \Iterator, \Countable
     }
 
     /**
+     * Gets the current item
      * 
      * @return multitype:
      */
@@ -152,6 +156,8 @@ class ColletionWrapper extends ModelWrapper implements \Iterator, \Countable
     }
 
     /**
+     * returns the current position
+     * 
      * @return scalar
      */
     function key() 
@@ -160,7 +166,7 @@ class ColletionWrapper extends ModelWrapper implements \Iterator, \Countable
     }
 
     /**
-     * @return \TCRD\Wrapper\ModelWrapper
+     * increments the counter
      */
     function next() 
     {
@@ -168,6 +174,8 @@ class ColletionWrapper extends ModelWrapper implements \Iterator, \Countable
     }
 
     /**
+     * checks to see if the current position is valid
+     * 
      * @return boolean
      */
     function valid() 
@@ -181,7 +189,16 @@ class ColletionWrapper extends ModelWrapper implements \Iterator, \Countable
     public function count()
     {
     	// TODO;
-    	return $this->object->count();
+    	return count($this->object); 
+    }
+    
+    /**
+     * (non-PHPdoc)
+     * @see ArrayAccess::offsetExists()
+     */
+    public function offsetExists($offset)
+    {
+    	return $this->object->offsetExists($offset);
     }
     
     /**
@@ -193,7 +210,7 @@ class ColletionWrapper extends ModelWrapper implements \Iterator, \Countable
     {
     	if (!isset($this->wrapped[$offset])) {
     		$this->wrapped[$offset] = $this->wrapItem(
-    				$this->collection->offsetGet($offset));
+    				$this->object->offsetGet($offset));
     	}
     	return $this->wrapped[$offset];
     }
@@ -204,8 +221,13 @@ class ColletionWrapper extends ModelWrapper implements \Iterator, \Countable
      * @param \TCRD\Wrapper\ModelWrapper $value
      * @throws \Exception
      */
-    public function offsetSet($offset, \TCRD\Wrapper\ModelWrapper $value)
+    public function offsetSet($offset,  $value)
     {
+    	if (!is_subclass_of($value, '\\TCRD\\Wrapper\\ModelWrapper')) {
+    		$class = get_class($value);
+    		throw new \Exception('blaw');
+    	}
+    	
     	$this->wrapped[$offset] = $value;
     	$this->object->offsetSet($value->getObject());
     }
@@ -219,7 +241,7 @@ class ColletionWrapper extends ModelWrapper implements \Iterator, \Countable
     	if (isset($this->wrapped[$offset])) {
     		unset($this->wrapped[$offset]);
     	}
-    	$this->collection->offsetUnset($offset);
+    	$this->object->offsetUnset($offset);
     }
 	
 }

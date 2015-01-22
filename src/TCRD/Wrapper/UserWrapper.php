@@ -7,4 +7,20 @@ class UserWrapper extends ModelWrapper
 	{
 		parent::__construct($object, $config);
 	}
+	
+	/**
+	 * 
+	 * @param array $array
+	 * @return \TCRD\Wrapper\Google_Model
+	 */
+	public function hydrateAddresses($array)
+	{
+		foreach ($array as $key => $addressArray) {
+			$addressObject = new \Google_Service_Directory_UserAddress();
+			$array[$key] = $this->recursiveHydrate($addressObject, $addressArray);
+			
+		}
+		
+		return $array;
+	}
 }
