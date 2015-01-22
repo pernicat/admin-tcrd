@@ -136,7 +136,7 @@ class ModelWrapper implements \ArrayAccess
 	{
 		$methodName = 'get' . ucfirst($key);
 		if (method_exists($this, $methodName)) {
-			return $this->$methodName;
+			return $this->$methodName();
 		}
 		
 		return $this->object->$key;

@@ -33,6 +33,14 @@ class UserWrapperTest extends PHPUnit_Framework_TestCase
 		
 		$this->assertEquals($user->addresses[0]->type, $values['addresses'][0]['type'] );
 		
+		$this->assertEquals('tony.pernicano', $wrapped->getUsername());
+		$this->assertEquals('tony.pernicano', $wrapped->username);
+		$this->assertTrue(isset($wrapped->username));
+		
+		$this->assertEquals('tcrollerderby.com', $wrapped->getDomain());
+		$this->assertEquals('tcrollerderby.com', $wrapped->domain);
+		$this->assertTrue(isset($wrapped->domain));
+		
 		//print_r(get_class($wrapped->getObject()));
 	}
 	

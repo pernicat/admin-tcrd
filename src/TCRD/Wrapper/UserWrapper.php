@@ -23,4 +23,24 @@ class UserWrapper extends ModelWrapper
 		
 		return $array;
 	}
+	
+	/**
+	 * 
+	 * @return string
+	 */
+	public function getUsername()
+	{
+		$parts = explode('@', $this->primaryEmail);
+		return $parts[0];
+	}
+	
+	/**
+	 * 
+	 * @return string
+	 */
+	public function getDomain()
+	{
+		$parts = explode('@', $this->primaryEmail);
+		return $parts[1];
+	}
 }
