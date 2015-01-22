@@ -96,7 +96,7 @@ class Process
 				array_map(array($this, 'log'), $filter->getMessages());
 			}
 			
-			if (!$this->isDebug()) {
+			if ($this->isProduction()) {
 				$entry->update($filter->getValue());
 			}
 			
@@ -118,7 +118,7 @@ class Process
 			$this->log($user->getPrimaryEmail() . " -> removing");
 			$user->setSuspended(true);
 			
-			if (!$this->isDebug()) {
+			if ($this->isProduction()) {
 				$this->app->updateDomainUser($user);
 			}
 		}
@@ -138,7 +138,7 @@ class Process
 			$this->log($user->getPrimaryEmail() . " -> unremoved");
 			$user->setSuspended(false);
 			
-			if (!$this->isDebug()) {
+			if ($this->isProduction()) {
 				$this->app->updateDomainUser($user);
 			}
 		}
@@ -245,7 +245,7 @@ class Process
 		/* @var $group \Google_Service_Directory_Group */
 		foreach ($positions as $group) {
 			
-			if (!$this->isDebug()) {
+			if ($this->isProduction()) {
 				$directory->groups->insert($group);
 			}
 			
@@ -267,8 +267,10 @@ class Process
 		foreach ($keys as $key) {
 			$this->log($key['groupKey'] . " remove " . $key['memberKey']);
 			
-			if (!$this->isDebug()) {
-				// TODO
+			if ($this->isProduction()) {
+				print "removing\n";
+				$directory = $this->app->mainDomain->getDirectory();
+				$directory->members->delete($key['groupKey'], $key['memberKey']);
 			}
 		}
 		return $this;
@@ -284,9 +286,9 @@ class Process
 		foreach ($keys as $key) {
 			$this->log($key['groupKey'] . " add " . $key['memberKey']);
 				
-			if (!$this->isDebug()) {
+			if ($this->isProduction()) {
 				$member = new \Google_Service_Directory_Member();
-				$member->setEmail($key['memberKey']);
+				$member->setEmail(strtolower($key['memberKey']));
 	
 				$directory = $this->app->mainDomain->getDirectory();
 				$directory->members->insert($key['groupKey'], $member);
@@ -314,6 +316,18 @@ class Process
 	public function isDebug()
 	{
 		return (defined('DEBUG') && constant('DEBUG'));
+	}
+	
+	/**
+	 * 
+	 * @return boolean
+	 */
+	public function isProduction()
+	{
+		if (!defined('PRODUCTION')) {
+			return false;
+		}
+		return constant('PRODUCTION');
 	}
 	
 	/**
