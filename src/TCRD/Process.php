@@ -35,6 +35,10 @@ class Process
 			$this->log("running in DEBUG mode");
 		}
 		
+		if ($this->isProduction()) {
+			$this->log("running in PRODUCTION mode");
+		}
+		
 		
 		// TODO add info to empty groups
 		
