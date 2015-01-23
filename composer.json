@@ -14,7 +14,8 @@
     "google/apiclient": "1.0.*@beta",
     "asimlqt/php-google-spreadsheet-client": "2.3.*",
     "pimple/pimple": "~3.0",
-    "php": ">=5.3.0"
+    "php": ">=5.3.0",
+    "phpbb/phpbb": "3.1.*"
   },
   "autoload": {
     "psr-0": {"TCRD": "src/"}
