@@ -5,4 +5,4 @@ composer.lock
 .settings
 .buildpath
 .project
-scripts/bootstrap.php
+scripts/bootstrap-old.php
