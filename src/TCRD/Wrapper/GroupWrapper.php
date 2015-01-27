@@ -19,7 +19,13 @@ class GroupWrapper extends ModelWrapper
 	 * 
 	 * @var \TCRD\Wrapper\ColletionWrapper
 	 */
-	protected $allMembers;
+	protected $members;
+	
+	/**
+	 * 
+	 * @var string
+	 */
+	protected $memberClass = '\\TCRD\\Wrapper\\ModelWrapper';
 	
 	/**
 	 * 
@@ -63,20 +69,26 @@ class GroupWrapper extends ModelWrapper
 	{
 		$directory = $this->getDirectory();
 		
-		// TODO set the class with this;
-		$config = array();
+		$members = $directory->members->listMembers($this->getEmail(), $parms);
 		
-		if (0 < count($parms)) {
-			$members = $directory->members->listMembers($this->getEmail(), $parms);
-			return new ColletionWrapper($members, $config);
+		$wrappedMembers = new ColletionWrapper($members, $config);
+		
+		// TODO set class
+		// TODO cache results
+		
+		return $wrappedMembers;
+	}
+	
+	/**
+	 * 
+	 * @return \TCRD\Wrapper\ColletionWrapper
+	 */
+	public function getMembers()
+	{
+		if (!$this->members) {
+			$this->members = $this->listMembers();
 		}
 		
-		if (!$this->allMembers) {
-			$members = $directory->members->listMembers($this->getEmail());
-				
-			$this->allMembers = new ColletionWrapper($members, $config);		
-		}
-		
-		return $this->allMembers;
+		return $this->members;
 	}
 }

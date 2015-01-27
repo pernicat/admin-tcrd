@@ -103,6 +103,9 @@ class Domain implements \Countable
 		
 		$userWrapper = new CollectionWrapper($users);
 		$userWrapper->setItemClass($this->userClass);
+		
+		// TODO cache users if no $params
+		
 		return $userWrapper;
 	}
 	

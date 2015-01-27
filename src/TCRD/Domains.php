@@ -10,12 +10,29 @@ namespace TCRD;
  */
 class Domains implements Interfaces\UniqueIndexer
 {
+	/**
+	 * 
+	 * @var \TCRD\Domain[]
+	 */
 	public $domains;
 	
+	/**
+	 * 
+	 * @var \TCRD\Domain
+	 */
 	public $main;
 	
+	/**
+	 * 
+	 * @var array
+	 */
 	public $unigueIndex = array();
 	
+	/**
+	 * 
+	 * @param Domain $domain
+	 * @return \TCRD\Domains
+	 */
 	public function addDomain(Domain $domain)
 	{
 		if (!$main) {
@@ -25,6 +42,11 @@ class Domains implements Interfaces\UniqueIndexer
 		return $this;
 	}
 	
+	/**
+	 * 
+	 * @param Domain $domain
+	 * @return \TCRD\Domains
+	 */
 	public function setMainDomain(Domain $domain)
 	{
 		// TODO error checking
