@@ -35,7 +35,7 @@ class Domains implements Interfaces\UniqueIndexer
 	 */
 	public function addDomain(Domain $domain)
 	{
-		if (!$main) {
+		if (!$this->main) {
 			$this->main = $domain;
 		}
 		$this->domains[] = $domain;

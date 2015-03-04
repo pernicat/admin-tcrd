@@ -1,6 +1,8 @@
 <?php
 use TCRD\Wrapper\ClientWrapper;
 use TCRD\Domains;
+use TCRD\Domain;
+use TCRD\File\FileAccess;
 
 define('ROOT', dirname(dirname(__FILE__)));
 
@@ -16,18 +18,26 @@ $pimp['config'] = function ($c) {
 	return $ymal->parse($contents);
 };
 
-$pimp['TCRD.clients'] = function ($c) {
+$pimp['TCRD.domains'] = function ($c) {
 	$domainConfigs = $c['config']['domains'];
 	
-	$clients = array();
+	$domains = new Domains();
 	
 	foreach ($domainConfigs as $key => $config) {
 		$client = new ClientWrapper(new Google_Client());
-		
 		$client->configure($config['client']);
 		
-		$clients[] = $client;
+		$accesTokenFile = new FileAccess(
+				ROOT . $config['access_token_file_location']);
+		$client->setAccessTokenFile($accesTokenFile);
+		
+		$directory = new Google_Service_Directory($client->getClient());
+		$domain = new Domain($directory, $key);
+		$domains->addDomain($domain);
+		
+		
 	}
 	
-	return $clients;
+	return $domains;
 };
+

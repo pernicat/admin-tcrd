@@ -93,16 +93,20 @@ class ClientWrapper
 	 */
 	protected function updateAccessToken()
 	{	
+		if (!$this->accessTokenFile) {
+			throw new \Exception("accessTokenFile has not been set");
+		}
+		
 		if (!$this->client->getAccessToken()) {
 			$token = $this->accessTokenFile->load();
 			
-			$this->client->setAccessToken(json_encode($token));
+			$this->client->setAccessToken($token);
 		}
 		
 		if ($this->client->isAccessTokenExpired()) {
 			$token = json_decode($this->client->getAccessToken());
 			
-			$this->client->refreshToken($token['refresh_token']);
+			$this->client->refreshToken($token->refresh_token);
 			
 			$this->accessTokenFile->save($this->client->getAccessToken());
 		}

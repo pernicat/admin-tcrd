@@ -1,6 +1,8 @@
 <?php
 namespace TCRD\File;
 
+use \Exception;
+
 class FileAccess
 {
 	/**
@@ -34,7 +36,13 @@ class FileAccess
 					"Could not load access token from " .
 					"'{$this->file}'");
 		}
-		return file_get_contents($location);
+		$contents = file_get_contents($this->file);
+		
+		if (!$contents) {
+			throw new exception("could not load contents of '{$this->file}'");
+		}
+		
+		return $contents;
 	}
 	
 	/**
