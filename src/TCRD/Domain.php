@@ -2,7 +2,14 @@
 namespace TCRD;
 
 use TCRD\Wrapper\CollectionWrapper;
-class Domain implements \Countable
+use Google_Service_Directory as Directory;
+use Countable;
+use Exception;
+use TCRD\Wrapper\CollectionWrapper as UsersWrapper;
+use TCRD\Wrapper\CollectionWrapper as GroupsWrapper;
+
+
+class Domain implements Countable
 {
 	
 	const DEFAULT_USER_LIMIT = 50;
@@ -34,7 +41,7 @@ class Domain implements \Countable
 	
 	/**
 	 * 
-	 * @var \TCRD\Wrapper\CollectionWrapper
+	 * @var UsersWrapper
 	 */
 	protected $users;
 	
@@ -42,18 +49,18 @@ class Domain implements \Countable
 	 * 
 	 * @var string
 	 */
-	protected $userClass = '\\TCRD\\Wrapper\\UserWrapper';
+	protected $userClass = 'TCRD\Wrapper\UserWrapper';
 	
 	/**
 	 * 
-	 * @var \TCRD\Wrapper\CollectionWrapper
+	 * @var GroupsWrapper
 	 */
 	protected $groups;
 	
 	/**
 	 * @var string
 	 */
-	protected $groupClass = '\\TCRD\\Wrapper\\GroupWrapper';
+	protected $groupClass = 'TCRD\Wrapper\GroupWrapper';
 	
 	/**
 	 * 
@@ -64,10 +71,10 @@ class Domain implements \Countable
 	
 	/**
 	 * 
-	 * @param \Google_Service_Directory $directory
+	 * @param Directory $directory
 	 * @param string $name
 	 */
-	public function __construct(\Google_Service_Directory $directory, $name) 
+	public function __construct(Directory $directory, $name) 
 	{
 		$this->directory = $directory;
 		$this->name = $name;
@@ -86,13 +93,13 @@ class Domain implements \Countable
 	/**
 	 * 
 	 * @param array $params
-	 * @throws \Exception
-	 * @return \TCRD\Wrapper\CollectionWrapper
+	 * @throws Exception
+	 * @return UsersWrapper
 	 */
 	public function listUsers($params = array())
 	{
 		if (!is_array($params)) {
-			throw new \Exception("\$params must be an array.");
+			throw new Exception("\$params must be an array.");
 		}
 		$params['domain'] = $this->getName();
 		$users =  $this->directory->users->listUsers($params);
@@ -101,7 +108,7 @@ class Domain implements \Countable
 			$this->count = count($users);
 		}
 		
-		$userWrapper = new CollectionWrapper($users);
+		$userWrapper = new UsersWrapper($users);
 		$userWrapper->setItemClass($this->userClass);
 		
 		// TODO cache users if no $params
@@ -111,7 +118,7 @@ class Domain implements \Countable
 	
 	/**
 	 * 
-	 * @return \TCRD\Wrapper\CollectionWrapper
+	 * @return UsersWrapper
 	 */
 	public function getUsers()
 	{
@@ -124,20 +131,20 @@ class Domain implements \Countable
 	/**
 	 * @todo
 	 * @param array $params
-	 * @throws \Exception
-	 * @return Google_Service_Directory_Groups
+	 * @throws Exception
+	 * @return GroupsWrapper
 	 */
 	public function listGroups($params = array())
 	{
 		if (!is_array($params)) {
-			throw new \Exception("\$params must be an array.");
+			throw new Exception("\$params must be an array.");
 		}
 		$params['domain'] = $this->getName();
 		$directory = $this->getDirectory();
 		
 		$groups = $directory->groups->listGroups($params);
 		
-		$groupWrapper = new CollectionWrapper($groups);
+		$groupWrapper = new GroupsWrapper($groups);
 		$groupWrapper->setItemClass($this->groupClass);
 		// TODO set group directory
 		
@@ -147,7 +154,7 @@ class Domain implements \Countable
 	
 	/**
 	 * 
-	 * @return \TCRD\Wrapper\CollectionWrapper
+	 * @return GroupsWrapper
 	 */
 	public function getGroups()
 	{

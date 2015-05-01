@@ -51,7 +51,7 @@ class ClientWrapperTest extends PHPUnit_Framework_TestCase
 	}
 	
 	/**
-	 * 
+	 * @expectedException Exception
 	 * 
 	 */
 	public function testGetTokenException()
