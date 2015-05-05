@@ -51,7 +51,11 @@ class Domains implements Interfaces\UniqueIndexer
 	 */
 	public function setMainDomain(Domain $domain)
 	{
-		// TODO error checking
+		if (!$this->hasDomain($domain)) {
+			$name = $domain->getName();
+			throw new Exception("Domain '$name' can not be set as main ". 
+								 "because it has not been added");
+		}
 		$this->main = $domain;
 		return $this;
 	}
@@ -75,5 +79,33 @@ class Domains implements Interfaces\UniqueIndexer
 	public function getUniqueIndex($field) 
 	{
 		// TODO
+	}
+	
+	
+	/**
+	 * 
+	 * @param Domain|string $domain
+	 * @throws Exception
+	 * @return boolean
+	 */
+	public function hasDomain($domain)
+	{
+		if ($domain instanceof Domain) {
+			$domain = $domain->getName();
+		}
+		
+		if (!is_string($domain)) {
+			$type = gettype($domain);
+			throw new Exception("\$domain must be string or Domain, $type given");
+		}
+		
+		/* @var $value Domain */
+		foreach ($this->domains as $value) {
+			if ($value->getName() === $domain) {
+				return true;
+			}
+		}
+		
+		return false;
 	}
 }
