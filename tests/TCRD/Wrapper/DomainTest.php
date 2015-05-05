@@ -12,7 +12,7 @@ class DomainTest extends TestCase
 {
 	/**
 	 * @dataProvider mockDirectoryProvider
-	 * @param  $directory
+	 * @param $directory
 	 * @param string $name
 	 */
 	public function testListUsers($directory, $name)

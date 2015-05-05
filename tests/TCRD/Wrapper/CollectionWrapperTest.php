@@ -1,30 +1,22 @@
 <?php
 
-class CollectionWrapperTest extends PHPUnit_Framework_TestCase
+namespace TCRD\Tests\Wrapper;
+
+use PHPUnit_Framework_TestCase as TestCase;
+use Google_Service_Directory_Users as Users;
+use Google_Service_Directory_User as User;
+use TCRD\Wrapper\CollectionWrapper;
+
+class CollectionWrapperTest extends TestCase
 {
 	/**
-	 * @dataProvider emailProvider
-	 * @param array $emails
+	 * @dataProvider usersProvider
+	 * @param Users $users
+	 * @param Array $emails
 	 */
-	public function testSetup(Array $emails)
+	public function testSetupUsers(Users $users, Array $emails)
 	{
-		//$emails = $this->emailProvider();
-		
-		$userArray = array();
-		
-		foreach ($emails as $key => $email) {
-			$user = new Google_Service_Directory_User();
-			$user->primaryEmail = $email;
-			
-			$userArray[] = $user;
-		}
-		
-		
-		
-		$users = new Google_Service_Directory_Users(array('users' => $userArray));
-		
-		
-		$wrappedUsers = new TCRD\Wrapper\CollectionWrapper($users);
+		$wrappedUsers = new CollectionWrapper($users);
 		$wrappedUsers->setItemClass('TCRD\Wrapper\UserWrapper');
 		
 		$this->assertEquals(count($emails), count($wrappedUsers));
@@ -41,34 +33,45 @@ class CollectionWrapperTest extends PHPUnit_Framework_TestCase
 			$this->assertEquals($emails[$key], $user['primaryEmail']);
 			
 			$wrappedUsers->next();
+			
+			$unique = $wrappedUsers->findUnique('primaryEmail', $emails[$key]);
+			$this->assertEquals($emails[$key], $unique->primaryEmail);
 		}
-		
 		
 		$emailIndex = $wrappedUsers->getUniqueIndex('primaryEmail');
 
 		$emailKeys = array_keys($emailIndex);
 		
-		//print_r($emails);
-		
 		$this->assertEquals($emails[0], $emailKeys[0]);
-		
-		$tacoChris = $wrappedUsers->findUnique('primaryEmail', 'taco.chris@tcrollerderby.com');
-		
-		$this->assertEquals('taco.chris@tcrollerderby.com', $tacoChris->primaryEmail);
 	}
 	
 	/**
 	 * 
-	 * @return multitype:string
+	 * @return multitype:multitype:multitype:string  \Google_Service_Directory_Users
 	 */
-	public function emailProvider() {
-		return array(array(array(
+	public function usersProvider() 
+	{
+		$emails = array(
 				'tony.pernicano@tcrollerderby.com',
 				'john.deer@tcrollerderby.com',
 				'taco.chris@tcrollerderby.com',
 				'bob.loblaw@tcrollerderby.com',
 				'kim.deal@tcrollerderby.com',
 				'nora.dame@tcrollerderby.com'
-		)));
+		);
+		
+		$userArray = array();
+		
+		foreach ($emails as $key => $email) {
+			$user = new User();
+			$user->primaryEmail = $email;
+				
+			$userArray[] = $user;
+		}
+		
+		$users = new Users(array('users' => $userArray));
+		
+		return array(array($users, $emails));
 	}
+	
 }

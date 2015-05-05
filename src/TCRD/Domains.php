@@ -35,10 +35,12 @@ class Domains implements Interfaces\UniqueIndexer
 	 */
 	public function addDomain(Domain $domain)
 	{
+		$this->domains[] = $domain;
+		
 		if (!$this->main) {
 			$this->main = $domain;
 		}
-		$this->domains[] = $domain;
+		
 		return $this;
 	}
 	
@@ -60,7 +62,7 @@ class Domains implements Interfaces\UniqueIndexer
 	 * @param scalar $value
 	 * @return mixed
 	 */
-	public function getunique($field, $value) 
+	public function getUnique($field, $value) 
 	{
 		// TODO
 	}

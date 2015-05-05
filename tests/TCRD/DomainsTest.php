@@ -8,31 +8,35 @@ use TCRD\Domains;
 
 class DomainsTest extends TestCase
 {
-	
-	public function testAddDomain()
+	/**
+	 * @dataProvider mockDomainProvider
+	 * @param array $domainsArray
+	 */
+	public function testAddDomain(Array $domainsArray)
 	{
 		$domains = new Domains();
 		
-		$domain1 = $this->mockDomainProvider();
-		$domain2 = $this->mockDomainProvider();
-		
-		
-		$domains->addDomain($domain1);
-		$domains->addDomain($domain2);
-		
-		$this->assertSame($domain1, $domains->domains[0]);
-		$this->assertSame($domain2, $domains->domains[1]);
+		foreach ($domainsArray as $key => $value) {
+			$domains->addDomain($value);
+			$this->assertSame($value, $domains->domains[$key]);
+		}
 	}
 	
 	/**
-	 * @return Domain
+	 * 
+	 * @return multitype:multitype:Domain
 	 */
 	public function mockDomainProvider() 
 	{
-		$domain = $this->getMockBuilder('TCRD\Domain')
-				->disableOriginalConstructor()
-			 	->getMock();
+		$domainArray = array();
+		for ($i = 0; $i < 4; $i++) {
+			$domain = $this->getMockBuilder('TCRD\Domain')
+					->disableOriginalConstructor()
+				 	->getMock();
+			
+			$domainArray[] = $domain;
+		}
 		
-		return $domain;
+		return array(array($domainArray));
 	}
 }
