@@ -4,6 +4,7 @@ namespace TCRD\Tests;
 use PHPUnit_Framework_TestCase as TestCase;
 use Google_Service_Directory as Directory;
 use Google_Service_Directory_User as User;
+use Google_Service_Directory_Group as Group;
 use Google_Collection as Collection;
 use TCRD\Domain;
 
@@ -20,12 +21,55 @@ class DomainTest extends TestCase
 		
 		$users = $domain->listUsers();
 		
-		//$this->assertInstanceOf('Google_Collection', $users);
-		
-		//$this->assertInstanceOf('Google_Service_Directory_Users', $users[0]);
-		
+		$this->assertInstanceOf('TCRD\Wrapper\CollectionWrapper', $users);
 		$this->assertEquals('first.last0@domain.com',  $users[0]->primaryEmail);
 		
+	}
+	
+	/**
+	 * @dataProvider mockDirectoryProvider
+	 * @param  $directory
+	 * @param string $name
+	 */
+	public function testGetUsers($directory, $name)
+	{
+		$domain = new Domain($directory, $name);
+	
+		$users = $domain->getUsers();
+	
+		$this->assertInstanceOf('TCRD\Wrapper\CollectionWrapper', $users);
+		$this->assertEquals('first.last0@domain.com',  $users[0]->primaryEmail);
+	}
+	
+	/**
+	 * @dataProvider mockDirectoryProvider
+	 * @param  $directory
+	 * @param string $name
+	 */
+	public function testListGroups($directory, $name)
+	{
+		$domain = new Domain($directory, $name);
+	
+		$users = $domain->listGroups();
+	
+		$this->assertInstanceOf('TCRD\Wrapper\CollectionWrapper', $users);
+		$this->assertEquals('group0',  $users[0]->id);
+	
+	}
+	
+	/**
+	 * @dataProvider mockDirectoryProvider
+	 * @param  $directory
+	 * @param string $name
+	 */
+	public function testGetGroups($directory, $name)
+	{
+		$domain = new Domain($directory, $name);
+	
+		$users = $domain->getGroups();
+	
+		$this->assertInstanceOf('TCRD\Wrapper\CollectionWrapper', $users);
+		$this->assertEquals('group0',  $users[0]->id);
 	}
 	
 	/**
@@ -34,29 +78,51 @@ class DomainTest extends TestCase
 	 */
 	public function mockDirectoryProvider()
 	{
-		$users = array();
-		
-		for ($i = 0; $i < 20; $i++) {
-			$user = new User();
-			$user->primaryEmail = "first.last$i@domain.com";
-			$users[] = $user;
-		}
-		
-		$collection = new Collection(array('items' => $users));
-		
 		$directoryStud = $this->getMockBuilder('Google_Service_Directory')
 				->disableOriginalConstructor()
 			 	->getMock();
+		
+		
 		
 		$usersStud = $this->getMockBuilder('Google_Service_Directory_Users')
 				->setMethods(array('listUsers'))
 				->disableOriginalConstructor()
 			 	->getMock();
 		
-		$usersStud->method('listUsers')
-				->willReturn($collection);
+		$users = array();
+		for ($i = 0; $i < 20; $i++) {
+			$user = new User();
+			$user->primaryEmail = "first.last$i@domain.com";
+			$users[] = $user;
+		}
+		$usersCollection = new Collection(array('items' => $users));
 		
-		$directoryStud->users =$usersStud;
+		$usersStud->method('listUsers')
+				->willReturn($usersCollection);
+		
+		$directoryStud->users = $usersStud;
+		
+		
+		
+		$groupsStud = $this->getMockBuilder('Google_Service_Directory_Groups')
+				->setMethods(array('listGroups'))
+				->disableOriginalConstructor()
+			 	->getMock();
+		
+		$groups = array();
+		for ($i = 0; $i < 20; $i++) {
+			$group = new Group();
+			$group->id = "group$i";
+			$groups[] = $group;
+		}
+		$groupsCollection = new Collection(array('items' => $groups));
+		
+		$groupsStud->method('listGroups')
+				->willReturn($groupsCollection);
+		
+		$directoryStud->groups = $groupsStud;
+		
+		
 		
 		return array(array($directoryStud, 'domain.com'));
 	}

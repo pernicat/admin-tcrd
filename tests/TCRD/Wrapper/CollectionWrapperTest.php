@@ -2,9 +2,13 @@
 
 class CollectionWrapperTest extends PHPUnit_Framework_TestCase
 {
-	public function testSetup()
+	/**
+	 * @dataProvider emailProvider
+	 * @param array $emails
+	 */
+	public function testSetup(Array $emails)
 	{
-		$emails = $this->emailProvider();
+		//$emails = $this->emailProvider();
 		
 		$userArray = array();
 		
@@ -21,7 +25,7 @@ class CollectionWrapperTest extends PHPUnit_Framework_TestCase
 		
 		
 		$wrappedUsers = new TCRD\Wrapper\CollectionWrapper($users);
-		$wrappedUsers->setItemClass('\\TCRD\\Wrapper\\UserWrapper');
+		$wrappedUsers->setItemClass('TCRD\Wrapper\UserWrapper');
 		
 		$this->assertEquals(count($emails), count($wrappedUsers));
 		
@@ -31,7 +35,7 @@ class CollectionWrapperTest extends PHPUnit_Framework_TestCase
 			$key = $wrappedUsers->key();
 			$user = $wrappedUsers->current();
 			
-			$this->assertInstanceOf('\\TCRD\\Wrapper\\UserWrapper', $user);
+			$this->assertInstanceOf('TCRD\Wrapper\UserWrapper', $user);
 				
 			$this->assertEquals($emails[$key], $user->primaryEmail);
 			$this->assertEquals($emails[$key], $user['primaryEmail']);
@@ -53,14 +57,18 @@ class CollectionWrapperTest extends PHPUnit_Framework_TestCase
 		$this->assertEquals('taco.chris@tcrollerderby.com', $tacoChris->primaryEmail);
 	}
 	
+	/**
+	 * 
+	 * @return multitype:string
+	 */
 	public function emailProvider() {
-		return array(
+		return array(array(array(
 				'tony.pernicano@tcrollerderby.com',
 				'john.deer@tcrollerderby.com',
 				'taco.chris@tcrollerderby.com',
 				'bob.loblaw@tcrollerderby.com',
 				'kim.deal@tcrollerderby.com',
 				'nora.dame@tcrollerderby.com'
-		);
+		)));
 	}
 }

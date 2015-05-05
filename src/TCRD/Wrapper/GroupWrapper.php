@@ -1,17 +1,21 @@
 <?php
 namespace TCRD\Wrapper;
 
+use Google_Service_Directory_Group as Group;
+use Google_Service_Directory as Directory;
+use Exception;
+
 class GroupWrapper extends ModelWrapper
 {
 	/**
 	 * 
-	 * @var \Google_Service_Directory_Group
+	 * @var Group
 	 */
 	protected $object;
 	
 	/**
 	 * 
-	 * @var \Google_Service_Directory
+	 * @var Directory
 	 */
 	protected $directory;
 	
@@ -25,24 +29,24 @@ class GroupWrapper extends ModelWrapper
 	 * 
 	 * @var string
 	 */
-	protected $memberClass = '\\TCRD\\Wrapper\\ModelWrapper';
+	protected $memberClass = 'TCRD\Wrapper\ModelWrapper';
 	
 	/**
 	 * 
-	 * @param \Google_Service_Directory_Group $group
+	 * @param Group $group
 	 * @param array $args
 	 */
-	public function __construct(\Google_Service_Directory_Group $group, $args) 
+	public function __construct(Group $group, $config = array()) 
 	{
-		parent::__construct($group, $args);
+		parent::__construct($group, $config);
 	}
 	
 	/**
 	 * 
-	 * @param \Google_Service_Directory $directory
+	 * @param Directory $directory
 	 * @return \TCRD\Wrapper\GroupWrapper
 	 */
-	public function setDirectory(\Google_Service_Directory $directory) {
+	public function setDirectory(Directory $directory) {
 		$this->directory = $directory;
 		return $this;
 	}
@@ -55,7 +59,7 @@ class GroupWrapper extends ModelWrapper
 	public function getDirectory()
 	{
 		if (!$this->directory) {
-			throw new \Exception("directory not set");
+			throw new Exception("directory not set");
 		}
 		return $this->directory;
 	}

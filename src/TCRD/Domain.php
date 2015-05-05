@@ -140,9 +140,8 @@ class Domain implements Countable
 			throw new Exception("\$params must be an array.");
 		}
 		$params['domain'] = $this->getName();
-		$directory = $this->getDirectory();
 		
-		$groups = $directory->groups->listGroups($params);
+		$groups = $this->directory->groups->listGroups($params);
 		
 		$groupWrapper = new GroupsWrapper($groups);
 		$groupWrapper->setItemClass($this->groupClass);
