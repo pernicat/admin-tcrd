@@ -7,6 +7,7 @@ use TCRD\Domains;
 use Google_Service_Directory_Users as Users;
 use Google_Service_Directory_Users_Resource as UsersResource;
 use Google_Service_Directory_User as User;
+use TCRD\Wrapper\UserWrapper;
 
 
 class DomainsTest extends TestCase
@@ -31,7 +32,7 @@ class DomainsTest extends TestCase
 	 * @param array $domainsArray
 	 * @param array $allUsers
 	 */
-	public function testFindUniqueIndex(
+	public function testGetUniqueIndex(
 			Domains $domains, 
 			Array $domainsArray, 
 			Array $allUsers)
@@ -41,6 +42,30 @@ class DomainsTest extends TestCase
 		/* @var $user User */
 		foreach ($allUsers as $user) {
 			$this->assertArrayHasKey($user->primaryEmail, $emailIndex);
+		}
+	}
+	
+	/**
+	 * @dataProvider mockDomainProvider
+	 * @param Domains $domains
+	 * @param array $domainsArray
+	 * @param array $allUsers
+	 */
+	public function testGetUnique(
+			Domains $domains,
+			Array $domainsArray,
+			Array $allUsers)
+	{
+		$emailIndex = $domains->getUniqueIndex('primaryEmail');
+	
+		/* @var $user User */
+		foreach ($allUsers as $user) {
+			/* @var $foundUser UserWrapper */
+			$foundUser = $domains->getUnique(
+					'primaryEmail', 
+					$user->primaryEmail);
+			
+			$this->assertSame($user, $foundUser->getObject());
 		}
 	}
 	

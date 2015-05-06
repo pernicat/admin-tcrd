@@ -82,7 +82,7 @@ class DomainTest extends TestCase
 	
 	/**
 	 * 
-	 * @return multitype:Directory
+	 * @return multitype:multitype:Directory|string
 	 */
 	public function mockDirectoryProvider()
 	{

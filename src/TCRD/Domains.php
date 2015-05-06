@@ -80,8 +80,14 @@ class Domains implements UniqueIndexer
 	 * @return mixed
 	 */
 	public function getUnique($field, $value) 
-	{
-		// TODO
+	{	
+		$index = $this->getUniqueIndex($field);
+		
+		if (array_key_exists($value, $index)) {
+			return $index[$value];
+		}
+		
+		return null;
 	}
 	
 	/**
