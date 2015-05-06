@@ -1,6 +1,10 @@
 <?php
 namespace TCRD;
 
+use Google_Service_Directory_User as User;
+use Exception;
+use TCRD\Interfaces\UniqueIndexer;
+
 /**
  * 
  * @author Tony Pernicano
@@ -8,7 +12,7 @@ namespace TCRD;
  * Serves as a collection of domains.
  *
  */
-class Domains implements Interfaces\UniqueIndexer
+class Domains implements UniqueIndexer
 {
 	/**
 	 * 
@@ -24,9 +28,15 @@ class Domains implements Interfaces\UniqueIndexer
 	
 	/**
 	 * 
-	 * @var array
+	 * @var multitype:multitype:User
 	 */
-	public $unigueIndex = array();
+	protected $uniqueIndex = array();
+	
+	/**
+	 * 
+	 * @var multitype:User
+	 */
+	protected $allUsers;
 	
 	/**
 	 * 
@@ -41,6 +51,9 @@ class Domains implements Interfaces\UniqueIndexer
 			$this->main = $domain;
 		}
 		
+		$this->allUsers = null;
+		$this->uniqueIndex = array();
+		
 		return $this;
 	}
 	
@@ -53,7 +66,7 @@ class Domains implements Interfaces\UniqueIndexer
 	{
 		if (!$this->hasDomain($domain)) {
 			$name = $domain->getName();
-			throw new Exception("Domain '$name' can not be set as main ". 
+			throw new Exception("Domain '$name' can not be set as main " . 
 								 "because it has not been added");
 		}
 		$this->main = $domain;
@@ -78,9 +91,60 @@ class Domains implements Interfaces\UniqueIndexer
 	*/
 	public function getUniqueIndex($field) 
 	{
-		// TODO
+		if (!array_key_exists($field, $this->uniqueIndex)) {
+			$this->uniqueIndex[$field] = $this->generateUniqueIndex($field);
+		}
+
+		return $this->uniqueIndex[$field];
 	}
 	
+	/**
+	 * 
+	 * @param scalar $field
+	 * @throws Exception
+	 * @return multitype:User
+	 */
+	protected function generateUniqueIndex($field)
+	{
+		$index = array();
+		
+		foreach ($this->getAllUsers() as $user) {
+			if (!is_object($user)) {
+				$type = gettype($user);
+				throw new Exception("\$user is a '$type' but should be an object");
+			}
+			
+			if (!$user->__isset($field)) {
+				$class = get_class($user);
+				
+				throw new Exception("'$field' not set for class '$class'");
+			}
+			
+			$index[$user->__get($field)] = $user;
+		}
+		ksort($index);
+		return $index;
+	}
+	
+	/**
+	 * 
+	 * @return multitype:User
+	 */
+	public function getAllUsers()
+	{
+		if (!$this->allUsers) {
+			$this->allUsers = array();
+			
+			foreach ($this->domains as $domain) {
+				$users = $domain->getUsers();
+				
+				$this->allUsers = array_merge(
+						$this->allUsers, 
+						$users->toArray());
+			}
+		}
+		return $this->allUsers;
+	}
 	
 	/**
 	 * 

@@ -1,7 +1,12 @@
 <?php
 namespace TCRD\Wrapper;
 
-class CollectionWrapper extends ModelWrapper implements \Iterator, \Countable
+use Exception;
+use Iterator;
+use Countable;
+use Google_Collection as Collection;
+
+class CollectionWrapper extends ModelWrapper implements Iterator, Countable
 {
 	/**
 	 * 
@@ -18,7 +23,7 @@ class CollectionWrapper extends ModelWrapper implements \Iterator, \Countable
 
 	/**
 	 * 
-	 * @var multitype:\TCRD\Wrapper\ModelWrapper
+	 * @var multitype:ModelWrapper
 	 */
 	protected $wrapped = array();
 	
@@ -32,7 +37,7 @@ class CollectionWrapper extends ModelWrapper implements \Iterator, \Countable
 	 * 
 	 * @var string
 	 */
-	protected $itemClass = '\\TCRD\\Wrapper\\ModelWrapper';
+	protected $itemClass = 'TCRD\Wrapper\ModelWrapper';
 	
 	/**
 	 * 
@@ -42,9 +47,9 @@ class CollectionWrapper extends ModelWrapper implements \Iterator, \Countable
 	
 	/**
 	 * 
-	 * @param \Google_Collection $collection
+	 * @param Google_Collection $collection
 	 */
-	public function __construct(\Google_Collection $collection, $args = null)
+	public function __construct(Collection $collection, $args = null)
 	{
 		parent::__construct($collection, $args);
 	}
@@ -223,7 +228,7 @@ class CollectionWrapper extends ModelWrapper implements \Iterator, \Countable
      */
     public function offsetSet($offset,  $value)
     {
-    	if (!is_subclass_of($value, '\\TCRD\\Wrapper\\ModelWrapper')) {
+    	if (!is_subclass_of($value, 'TCRD\Wrapper\ModelWrapper')) {
     		$class = get_class($value);
     		throw new \Exception('blaw');
     	}
@@ -242,6 +247,21 @@ class CollectionWrapper extends ModelWrapper implements \Iterator, \Countable
     		unset($this->wrapped[$offset]);
     	}
     	$this->object->offsetUnset($offset);
+    }
+    
+    /**
+     * (non-PHPdoc)
+     * @see \TCRD\Wrapper\ModelWrapper::toArray()
+     */
+    public function toArray()
+    {
+    	$array = array();
+    	
+    	foreach ($this as $item) {
+    		$array[] = $item;
+    	}
+    	
+    	return $array;
     }
 	
 }

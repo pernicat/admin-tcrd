@@ -5,6 +5,7 @@ use PHPUnit_Framework_TestCase as TestCase;
 use TCRD\Domain;
 use TCRD\Domains;
 use Google_Service_Directory_Users as Users;
+use Google_Service_Directory_Users_Resource as UsersResource;
 use Google_Service_Directory_User as User;
 
 
@@ -21,6 +22,25 @@ class DomainsTest extends TestCase
 		foreach ($domainsArray as $key => $value) {
 			$domains->addDomain($value);
 			$this->assertSame($value, $domains->domains[$key]);
+		}
+	}
+	
+	/**
+	 * @dataProvider mockDomainProvider
+	 * @param Domains $domains
+	 * @param array $domainsArray
+	 * @param array $allUsers
+	 */
+	public function testFindUniqueIndex(
+			Domains $domains, 
+			Array $domainsArray, 
+			Array $allUsers)
+	{
+		$emailIndex = $domains->getUniqueIndex('primaryEmail');
+		
+		/* @var $user User */
+		foreach ($allUsers as $user) {
+			$this->assertArrayHasKey($user->primaryEmail, $emailIndex);
 		}
 	}
 	
@@ -47,10 +67,20 @@ class DomainsTest extends TestCase
 				$user = new User();
 				$user->primaryEmail = "test.user$j@$name";
 				$usersArray[] = $user;
-				$allUsers = $user;
+				$allUsers[] = $user;
 			}
 			
-			$directory->users = new Users(array('users' => $usersArray));
+			$users = new Users(array('users' => $usersArray));
+			
+			$usersResource = $this->getMockBuilder(
+					'Google_Service_Directory_Users_Resource')
+					->disableOriginalConstructor()
+					->getMock();
+			
+			$usersResource->method('listUsers')
+				->willReturn($users);
+			
+			$directory->users = $usersResource;
 			
 			
 			$domain = new Domain($directory, $name);

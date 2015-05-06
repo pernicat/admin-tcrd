@@ -46,6 +46,23 @@ class CollectionWrapperTest extends TestCase
 	}
 	
 	/**
+	 * @dataProvider usersProvider
+	 * @param Users $users
+	 * @param Array $emails
+	 */
+	public function testToArray(Users $users, Array $emails)
+	{
+		$wrappedUsers = new CollectionWrapper($users);
+		$wrappedUsers->setItemClass('TCRD\Wrapper\UserWrapper');
+	
+		$usersArray = $wrappedUsers->toArray();
+		
+		foreach ($usersArray as $user) {
+			$this->assertInstanceOf('TCRD\Wrapper\UserWrapper', $user);
+		}
+	}
+	
+	/**
 	 * 
 	 * @return multitype:multitype:multitype:string  \Google_Service_Directory_Users
 	 */

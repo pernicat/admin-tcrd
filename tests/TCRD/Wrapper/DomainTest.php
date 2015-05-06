@@ -4,6 +4,7 @@ namespace TCRD\Tests;
 use PHPUnit_Framework_TestCase as TestCase;
 use Google_Service_Directory as Directory;
 use Google_Service_Directory_User as User;
+use Google_Service_Directory_Users as Users;
 use Google_Service_Directory_Group as Group;
 use Google_Collection as Collection;
 use TCRD\Domain;
@@ -39,6 +40,13 @@ class DomainTest extends TestCase
 	
 		$this->assertInstanceOf('TCRD\Wrapper\CollectionWrapper', $users);
 		$this->assertEquals('first.last0@domain.com',  $users[0]->primaryEmail);
+		
+		$usersArray = $users->toArray();
+		
+		foreach ($usersArray as $user) {
+			$this->assertInstanceOf('TCRD\Wrapper\UserWrapper', $user);
+		}
+		
 	}
 	
 	/**
@@ -84,7 +92,7 @@ class DomainTest extends TestCase
 		
 		
 		
-		$usersStud = $this->getMockBuilder('Google_Service_Directory_Users')
+		$usersStud = $this->getMockBuilder('Google_Service_Directory_Users_Resource')
 				->setMethods(array('listUsers'))
 				->disableOriginalConstructor()
 			 	->getMock();
@@ -95,7 +103,7 @@ class DomainTest extends TestCase
 			$user->primaryEmail = "first.last$i@domain.com";
 			$users[] = $user;
 		}
-		$usersCollection = new Collection(array('items' => $users));
+		$usersCollection = new Users(array('users' => $users));
 		
 		$usersStud->method('listUsers')
 				->willReturn($usersCollection);
