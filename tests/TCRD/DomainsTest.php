@@ -9,7 +9,11 @@ use Google_Service_Directory_Users_Resource as UsersResource;
 use Google_Service_Directory_User as User;
 use TCRD\Wrapper\UserWrapper;
 
-
+/**
+ * 
+ * @author Tony Pernicano
+ *
+ */
 class DomainsTest extends TestCase
 {
 	/**

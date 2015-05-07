@@ -1,6 +1,12 @@
 <?php
 namespace TCRD\Worksheet;
 
+use Exception;
+use Google\Spreadsheet\Worksheet;
+use Google\Spreadsheet\ListFeed;
+use Google\Spreadsheet\ListEntry;
+use TCRD\Worksheet\Entry;
+
 /**
  * 
  * @author Tony Pernicano
@@ -11,7 +17,7 @@ class WorksheetContainer
 {
 	/**
 	 * 
-	 * @var \Google\Spreadsheet\Worksheet
+	 * @var Worksheet
 	 */
 	protected $worksheet;
 	
@@ -23,16 +29,22 @@ class WorksheetContainer
 	
 	/**
 	 * 
-	 * @param \Google\Spreadsheet\Worksheet $sheet
+	 * @var array
 	 */
-	public function __construct(\Google\Spreadsheet\Worksheet $worksheet)
+	protected $entries;
+	
+	/**
+	 * 
+	 * @param Worksheet $sheet
+	 */
+	public function __construct(Worksheet $worksheet)
 	{
 		$this->worksheet = $worksheet;
 	}
 	
 	/**
 	 * 
-	 * @return \Google\Spreadsheet\Worksheet
+	 * @return Worksheet
 	 */
 	public function getWorksheet()
 	{
@@ -41,7 +53,7 @@ class WorksheetContainer
 	
 	/**
 	 * 
-	 * @return \Google\Spreadsheet\List\Feed
+	 * @return ListFeed
 	 */
 	public function getListFeed()
 	{
@@ -51,29 +63,24 @@ class WorksheetContainer
 	/**
 	 * 
 	 * @param array $where
-	 * @return multitype:\TCRD\Google\Spreadsheet\ListEntry
+	 * @return multitype:ListEntry
 	 */
 	public function find($where)
 	{
 		if (!is_array($where)) {
-			throw new \Exception("\$where must be an assosiative array\n");
+			throw new Exception("\$where must be an assosiative array\n");
 		}
 		
-		$this->index[$name] = array();
-		$listFeed = $this->getListFeed();
-
 		$results = array();
 		
-		/* @var $entry Google\Spreadsheet\ListEntry */
-		foreach ($listFeed->getEntries() as $entry) {
-			$values = $entry->getValues();
-			
+		/* @var $entry Entry */
+		foreach ($this->getEntries() as $entry) {
 			foreach ($where as $k => $v) {
-				if (!isset($values[$k])) {
-					throw new \Exception("index $k not found\n");
+				if (!$entry__isset($k)) {
+					throw new Exception("index $k not found\n");
 				}
 				
-				if ($values[$k] != $v) {
+				if ($entry__get($k) != $v) {
 					// lazy
 					continue 2;
 				}
@@ -88,35 +95,50 @@ class WorksheetContainer
 	/**
 	 * 
 	 * @param string $field
-	 * @throws \Exception
-	 * @return array:
+	 * @throws Exception
+	 * @return multitype:Entry
 	 */
-	public function getIndex($field) 
+	public function getUniquIndex($field) 
 	{
-	
-		if (!isset($this->index[$field])) {
+		if (!array_key_exists($field, $this->index)) {
 	
 			$this->index[$field] = array();
 			$listFeed = $this->getListFeed();
 				
-			/* @var $entry Google\Spreadsheet\ListEntry */
-			foreach ($listFeed->getEntries() as $entry) {
+			/* @var $entry Entry */
+			foreach ($this->getEntries() as $entry) {
 	
-				$values = $entry->getValues();
-	
-				if (!isset($values[$field])) {
-					throw new \Exception("field $field does not exist\n");
+				if (!$entry->__isset($field)) {
+					throw new Exception("field $field does not exist\n");
 				}
 					
-				$key = trim(strtolower($values[$field]));
+				$key = trim(strtolower($entry->__get($field)));
 	
 				if (isset($this->index[$field][$key])) {
-					throw new \Exception("field $field must be unique $key exist more then once\n");
+					throw new Exception("field $field must be unique $key exist more then once\n");
 				}
 	
 				$this->index[$field][$key] = $entry;
 			}
 		}
 		return $this->index[$field];
+	}
+	
+	/**
+	 * 
+	 * @return multitype:Entry
+	 */
+	public function getEntries()
+	{
+		if (!$this->entries) {
+			$this->entries = array();
+			
+			$listFeed = $this->getListFeed();
+			
+			foreach ($listFeed->getEntries() as $listEntry) {
+				$this->entries[] = new Entry($listEntry);
+			}
+		}
+		return $this->entries;
 	}
 }
