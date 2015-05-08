@@ -5,9 +5,76 @@ use PHPUnit_Framework_TestCase as TestCase;
 use Google\Spreadsheet\Worksheet;
 use Google\Spreadsheet\ListFeed;
 use Google\Spreadsheet\ListEntry;
+use TCRD\Worksheet\WorksheetContainer as Container;
+use TCRD\Worksheet\Entry;
 
+/**
+ * 
+ * @author Tony Pernicano
+ *
+ */
 class WorksheetContaainerTest extends TestCase
 {
+	/**
+	 * @dataProvider mockWorksheetProvider
+	 * @param Worksheet $worksheet
+	 * @param array $listEntries
+	 */
+	public function testFind(
+			Worksheet $worksheet,
+			Array $listEntries)
+	{
+		$container = new Container($worksheet);
+		
+		$result = $container->find(array('thing' => 'even'));
+		
+		foreach ($result as $entry) {
+		
+			$this->assertEquals(0, $entry->i % 2);
+		}
+	}
+	
+	/**
+	 * @dataProvider mockWorksheetProvider
+	 * @param Worksheet $worksheet
+	 * @param array $listEntries
+	 */
+	public function testGetUniqueIndex(
+			Worksheet $worksheet, 
+			Array $listEntries)
+	{
+		$container = new Container($worksheet);
+		
+		$index = $container->getUniquIndex('name');
+			
+		$this->assertArrayHaskey('user1', $index);
+
+		
+	}
+	
+	/**
+	 * @dataProvider mockWorksheetProvider
+	 * @param Worksheet $worksheet
+	 * @param array $listEntries
+	 */
+	public function testGetEntries(
+			Worksheet $worksheet, 
+			Array $listEntries)
+	{
+		$container = new Container($worksheet);
+		
+		$entries = $container->getEntries();
+		
+		foreach ($entries as $key => $entry) {
+			
+			$this->assertInstanceOf('TCRD\Worksheet\Entry', $entry);
+			
+			/* @var $listEntry ListEntry */
+			$listEntry = $listEntries[$key];
+			$this->assertEquals($listEntry->getValues(), $entry->toArray());
+		}
+	}
+	
 	/**
 	 * 
 	 * @return multitype:multitype:Worksheet multitype:ListEntry
@@ -34,7 +101,10 @@ class WorksheetContaainerTest extends TestCase
 					->getMock();
 			
 			$values = array(
-				'name' => "user$i"	
+				'name' => "user$i",
+				'primaryEmail' => "user$i@domain.com",
+				'thing' => $i % 2 == 0 ? 'even' : 'odd',
+				'i' => $i
 			);
 			
 			$listEntryMock->method('getValues')

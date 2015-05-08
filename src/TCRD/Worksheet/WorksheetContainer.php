@@ -76,11 +76,11 @@ class WorksheetContainer
 		/* @var $entry Entry */
 		foreach ($this->getEntries() as $entry) {
 			foreach ($where as $k => $v) {
-				if (!$entry__isset($k)) {
+				if (!$entry->__isset($k)) {
 					throw new Exception("index $k not found\n");
 				}
 				
-				if ($entry__get($k) != $v) {
+				if ($entry->__get($k) != $v) {
 					// lazy
 					continue 2;
 				}
@@ -115,11 +115,13 @@ class WorksheetContainer
 				$key = trim(strtolower($entry->__get($field)));
 	
 				if (isset($this->index[$field][$key])) {
-					throw new Exception("field $field must be unique $key exist more then once\n");
+					throw new Exception("field $field must be unique " .
+							"$key exist more then once\n");
 				}
 	
 				$this->index[$field][$key] = $entry;
 			}
+			ksort($this->index[$field]);
 		}
 		return $this->index[$field];
 	}
